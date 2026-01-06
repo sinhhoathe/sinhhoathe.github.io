@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Giá Dịch Vụ - Điểm Danh GPS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Giới hạn chiều rộng trang để không bị vỡ khi zoom out quá xa */
+        .container {
+            max-width: 1200px !important;
+            margin: 0 auto;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding-bottom: 6rem;
+            margin-bottom: -4rem;
+        }
+
+        .pricing-section {
+            padding: 2rem 1.5rem;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+            /* Cố định chiều cao tối thiểu để các khung bằng nhau */
+            min-height: 520px; 
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-5px); /* Giảm độ nảy để đỡ nhảy layout */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: #4facfe;
+            z-index: 10;
+        }
+
+        .pricing-card.popular {
+            border: 2px solid #4facfe;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.2);
+        }
+
+        .popular-tag {
+            background: #ff9f43;
+            color: white;
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        /* KHUNG HEADER CỦA CARD (Tên, Giá) - Cố định độ cao */
+        .card-header-section {
+            min-height: 160px; /* Cố định chiều cao vùng này */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 1rem;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 1rem;
+        }
+
+        .plan-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #2d3436;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            height: 2.5rem; /* Cố định chiều cao tên gói (tránh rớt dòng làm lệch) */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0984e3;
+            line-height: 1.2;
+            white-space: nowrap; /* Không cho giá rớt dòng */
+        }
+        
+        .plan-duration {
+            display: inline-block;
+            background: #dfe6e9;
+            color: #636e72;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* KHUNG DANH SÁCH TÍNH NĂNG - Cố định độ cao */
+        .features-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-grow: 1;
+            margin-bottom: 2rem;
+            text-align: left;
+            /* Đảm bảo danh sách luôn chiếm không gian ổn định */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .features-list li {
+            margin-bottom: 0.8rem;
+            color: #555;
+            display: flex;
+            align-items: flex-start; /* Canh lề trên để icon không chạy lung tung */
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .features-list li::before {
+            content: "✓";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #e3f2fd;
+            color: #2196f3;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0; /* Không cho icon bị méo */
+            margin-top: 2px;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: auto; /* Đẩy nút xuống dưới cùng */
+        }
+
+        .cta-button.primary {
+            background: #4facfe;
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .cta-button.primary:hover {
+            background: #00f2fe;
+            transform: scale(1.02);
+        }
+        
+        .cta-button.outline {
+            background: white;
+            border: 2px solid #4facfe;
+            color: #4facfe;
+        }
+
+        .cta-button.outline:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal-card {
+            border-radius: 15px;
+            max-width: 450px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero is-medium hero-gradient">
+        <div class="hero-body pt-6 pb-6">
+            <div class="container has-text-centered">
+                <h1 class="title is-2 is-size-3-mobile has-text-white mb-4">
+                    🚀 NÂNG TẦM QUẢN LÝ
+                </h1>
+                <p class="subtitle is-5 is-size-6-mobile has-text-white mb-6" style="opacity: 0.9;">
+                    Giải pháp điểm danh GPS Chính xác - Tiết kiệm
+                </p>
+                <div class="buttons is-centered">
+                    <a href="login.html" class="button is-white is-rounded has-text-info has-text-weight-bold shadow-lg">
+                        <span>🔑 Đăng nhập</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reality & Solution Section (Nêu vấn đề thực tế) -->
+    <section class="section has-background-white-ter">
+        <div class="container">
+            <h2 class="title is-2 has-text-centered mb-6" style="color: #2d3436;">🤔 Tại sao bạn cần hệ thống này?</h2>
+            
+            <div class="columns is-variable is-6">
+                <!-- Cột vấn đề (Cách cũ) -->
+                <div class="column is-6">
+                    <div class="box h-100" style="height: 100%; border-left: 5px solid #ff7675;">
+                        <h3 class="title is-4 has-text-danger mb-4">
+                            🚫 Cách làm truyền thống & Hạn chế
+                        </h3>
+                        <div class="content is-medium">
+                            <article class="media">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-danger"><span class="is-size-4">❌</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Điểm danh gọi tên:</strong>
+                                    <p class="is-size-6 mt-1">Quá mất thời gian, gây ồn ào và gián đoạn chương trình. Khó kiểm soát khi số lượng đông.</p>
+                                </div>
+                            </article>
+                            
+                            <article class="media mt-4">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-danger"><span class="is-size-4">❌</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Quét mã QR / Google Form:</strong>
+                                    <p class="is-size-6 mt-1">Không chính xác! Người ở nhà, quán cafe nếu có link/ảnh QR vẫn điểm danh được ("gian lận").</p>
+                                </div>
+                            </article>
+
+                            <article class="media mt-4">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-danger"><span class="is-size-4">❌</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Máy chấm công vân tay:</strong>
+                                    <p class="is-size-6 mt-1">Chi phí đầu tư thiết bị cao, lắp đặt rườm rà, gây ùn tắc khi xếp hàng đợi.</p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột Giải pháp (Cách mới) -->
+                <div class="column is-6">
+                    <div class="box h-100 hvr-float" style="height: 100%; border-left: 5px solid #00b894; background: #f0fff4;">
+                        <h3 class="title is-4 has-text-success mb-4">
+                            ✅ Giải pháp GPS đột phá
+                        </h3>
+                        <div class="content is-medium">
+                            <article class="media">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-success"><span class="is-size-4">🎯</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Chính xác tuyệt đối:</strong>
+                                    <p class="is-size-6 mt-1">Chỉ những ai <strong>có mặt tại địa điểm</strong> (trong bán kính cho phép) mới điểm danh được.</p>
+                                </div>
+                            </article>
+
+                            <article class="media mt-4">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-success"><span class="is-size-4">⚡</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Siêu tốc độ & Tiện lợi:</strong>
+                                    <p class="is-size-6 mt-1">1000 người có thể điểm danh cùng lúc trong 30 giây bằng chính điện thoại của họ.</p>
+                                </div>
+                            </article>
+
+                            <article class="media mt-4">
+                                <figure class="media-left">
+                                    <span class="icon is-large has-text-success"><span class="is-size-4">💰</span></span>
+                                </figure>
+                                <div class="media-content">
+                                    <strong>Tiết kiệm tối đa:</strong>
+                                    <p class="is-size-6 mt-1">Không cần mua máy móc. Chỉ cần thuê phần mềm theo ngày/tháng với chi phí rẻ như một ly cafe.</p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section has-background-white" style="margin-top: 3rem;">
+        <div class="container">
+            <h2 class="title is-2 has-text-centered mb-6" style="color: #2d3436;">⚙️ Quy Trình Hoạt Động</h2>
+            
+            <div class="columns is-multiline is-centered has-text-centered">
+                <!-- Step 1 -->
+                <div class="column is-3">
+                    <div class="box h-100" style="height: 100%; border-radius: 15px; border-top: 4px solid #4facfe;">
+                        <span class="is-size-1 mb-3">📝</span>
+                        <h4 class="title is-4 mt-2">1. Đăng Ký</h4>
+                        <p class="has-text-grey">Liên hệ Admin để chọn gói và nhận tài khoản quản trị riêng.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="column is-3">
+                    <div class="box h-100" style="height: 100%; border-radius: 15px; border-top: 4px solid #00f2fe;">
+                        <span class="is-size-1 mb-3">🛠️</span>
+                        <h4 class="title is-4 mt-2">2. Tạo Hội Nghị</h4>
+                        <p class="has-text-grey">Đăng nhập, tạo hội nghị mới và thiết lập vị trí GPS, bán kính.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="column is-3">
+                    <div class="box h-100" style="height: 100%; border-radius: 15px; border-top: 4px solid #4facfe;">
+                        <span class="is-size-1 mb-3">🔗</span>
+                        <h4 class="title is-4 mt-2">3. Gửi Link</h4>
+                        <p class="has-text-grey">Sao chép Link điểm danh và gửi cho người tham dự (Zalo/QR Code).</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="column is-3">
+                    <div class="box h-100" style="height: 100%; border-radius: 15px; border-top: 4px solid #00f2fe;">
+                        <span class="is-size-1 mb-3">📊</span>
+                        <h4 class="title is-4 mt-2">4. Xuất Báo Cáo</h4>
+                        <p class="has-text-grey">Xem danh sách người đã điểm danh theo thời gian thực và xuất file Excel.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Instructions Dropdown -->
+            <div class="has-text-centered mt-6">
+                <button class="button is-rounded is-info is-outlined" id="toggleDetailsBtn">
+                    <span>📖 Xem Hướng Dẫn Chi Tiết & Lưu Ý</span>
+                </button>
+            </div>
+
+            <div id="detailedInstructions" class="box mt-5 has-text-left" style="display: none; border-left: 5px solid #4facfe; background-color: #f8fbff;">
+                <h4 class="title is-5 mb-3" style="color: #0984e3;">📋 Hướng Dẫn Chi Tiết Từng Bước:</h4>
+                <div class="content">
+                    <ol>
+                        <li><strong>Đăng ký tài khoản:</strong> Liên hệ Admin qua Zalo/SĐT để chọn gói cước phù hợp. Bạn sẽ được cấp Tài khoản & Mật khẩu riêng.</li>
+                        <li><strong>Đăng nhập hệ thống:</strong> Truy cập vào trang <code>login.html</code>, nhập thông tin tài khoản được cấp.</li>
+                        <li><strong>Tạo hội nghị mới:</strong>
+                            <ul>
+                                <li>Nhấn nút <strong>"Tạo hội nghị mới"</strong>.</li>
+                                <li>Nhập Tên hội nghị, Mã hội nghị (Code).</li>
+                                <li><strong>Quan trọng:</strong> Nhấn nút "Lấy vị trí hiện tại" khi bạn đang đứng tại địa điểm tổ chức để ghim tọa độ GPS.</li>
+                                <li>Thiết lập bán kính (ví dụ: 100m - 200m) và thời gian mở/đóng điểm danh.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Gửi link điểm danh:</strong> Tại danh sách hội nghị, nhấn nút <strong>"Copy Link"</strong> và gửi vào nhóm Zalo hoặc tạo mã QR để dán tại hội trường.</li>
+                        <li><strong>Kiểm soát:</strong> Vào mục "Chi tiết" để xem danh sách đại biểu điểm danh theo thời gian thực (Real-time).</li>
+                    </ol>
+                </div>
+
+                <hr style="background-color: #e1e1e1;">
+
+                <h4 class="title is-5 mb-3" style="color: #d63031;">⚠️ Lưu Ý Quan Trọng:</h4>
+                <div class="content">
+                    <ul>
+                        <li>🔴 <strong>Về GPS </strong> Sau khi truy cập đường link điểm danh, bạn <strong>BẮT BUỘC</strong> phải ấn đồng ý để bật định vị (Location) trên điện thoại và cấp quyền truy cập vị trí cho trình duyệt mới có thể điểm danh.</li>
+                        <li>🔴 <strong>Điểm danh trùng:</strong> Nếu bạn đang dùng chung WiFi, vui lòng TẮT WiFi và bật 4G để điểm danh tiếp.</li>
+                        <li>🔴 <strong>Về Trình duyệt:</strong> Khuyên dùng <strong>Chrome</strong> hoặc <strong>Safari</strong>. Zalo Browser đôi khi chặn quyền GPS, nếu gặp lỗi hãy chọn "Mở bằng trình duyệt khác".</li>
+                        <li>🔴 <strong>Hết hạn:</strong> Khi gói cước hết hạn, bạn sẽ không thể đăng nhập. Đừng quên tải file Excel để xem danh sách đại biểu đã điểm danh tránh trường hợp mất dữ liệu sau khi tài khoản quản lý hết hạn.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Toggle Detailed Instructions
+        const toggleBtn = document.getElementById('toggleDetailsBtn');
+        const detailsBox = document.getElementById('detailedInstructions');
+
+        if (toggleBtn && detailsBox) {
+            toggleBtn.addEventListener('click', () => {
+                if (detailsBox.style.display === 'none') {
+                    detailsBox.style.display = 'block';
+                    toggleBtn.innerHTML = '<span>🔼 Thu gọn hướng dẫn</span>';
+                    toggleBtn.classList.add('is-active');
+                } else {
+                    detailsBox.style.display = 'none';
+                    toggleBtn.innerHTML = '<span>📖 Xem Hướng Dẫn Chi Tiết & Lưu Ý</span>';
+                    toggleBtn.classList.remove('is-active');
+                }
+            });
+        }
+    </script>
+
+    <!-- Video Demo Section -->
+    <section class="section" style="background-color: #f1f2f6;">
+        <div class="container has-text-centered">
+            <h2 class="title is-2 mb-5" style="color: #2d3436;">📺 Video Hướng Dẫn</h2>
+            <p class="subtitle is-5 mb-6">Xem thực tế cách hệ thống hoạt động trong 1 phút</p>
+            
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <!-- Video Container (16:9 Aspect Ratio) -->
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                        <!-- Placeholder for Video -->
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; flex-direction: column;">
+                            <span style="font-size: 5rem; opacity: 0.7;">▶️</span>
+                            <p class="mt-3 is-size-5">Video Demo đang được cập nhật...</p>
+                        </div>
+                        
+                        <!-- Sau này anh bỏ comment dòng dưới và chèn link video thật vào src nhé -->
+                        <!-- <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allowfullscreen></iframe> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+        <div class="container">
+            <h2 class="title is-2 has-text-centered mb-6" style="color: #2d3436;">💰 Bảng Giá Dịch Vụ</h2>
+            <div class="columns is-centered is-variable is-4">
+                
+                <!-- Gói 1 Ngày -->
+                <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                    <div class="pricing-card">
+                        <div class="card-header-section">
+                            <h3 class="plan-name">TRẢI NGHIỆM</h3>
+                            <div class="plan-price">20.000đ</div>
+                            <span class="plan-duration">⏳ 1 Ngày</span>
+                        </div>
+                        <ul class="features-list">
+                            <li>Không giới hạn hội nghị</li>
+                            <li>Định vị GPS chính xác</li>
+                            <li>Xuất file báo cáo Excel</li>
+                            <li>Hỗ trợ kỹ thuật cơ bản</li>
+                        </ul>
+                        <button class="cta-button outline" onclick="openPayment('Gói 1 Ngày', 20000)">
+                            Chọn Gói Này
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gói 1 Tuần -->
+                <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                    <div class="pricing-card popular">
+                        <div class="popular-tag">HOT</div>
+                        <div class="card-header-section">
+                            <h3 class="plan-name">SỰ KIỆN</h3>
+                            <div class="plan-price">120.000đ</div>
+                            <span class="plan-duration">📅 1 Tuần</span>
+                        </div>
+                        <ul class="features-list">
+                            <li><strong>Full tính năng gói Ngày</strong></li>
+                            <li>Lưu dữ liệu trong 7 ngày</li>
+                            <li>Phù hợp cho Event ngắn hạn</li>
+                            <li>Dữ liệu bảo mật riêng biệt</li>
+                        </ul>
+                        <button class="cta-button primary" onclick="openPayment('Gói 1 Tuần', 120000)">
+                            Đăng Ký Ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gói 1 Tháng -->
+                <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                    <div class="pricing-card">
+                        <div class="card-header-section">
+                            <h3 class="plan-name">CHUYÊN NGHIỆP</h3>
+                            <div class="plan-price">360.000đ</div>
+                            <span class="plan-duration">🗓️ 1 Tháng</span>
+                        </div>
+                        <ul class="features-list">
+                            <li>Dành cho Công ty / Đội nhóm</li>
+                            <li>Điểm danh hoạt động hàng ngày</li>
+                            <li>Hệ thống ổn định 24/7</li>
+                            <li>Tiết kiệm 50% chi phí</li>
+                        </ul>
+                        <button class="cta-button outline" onclick="openPayment('Gói 1 Tháng', 360000)">
+                            Chọn Gói Này
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gói 1 Năm -->
+                <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                    <div class="pricing-card">
+                        <div class="card-header-section">
+                            <h3 class="plan-name">VIP NĂM</h3>
+                            <div class="plan-price">3.960.000đ</div>
+                            <span class="plan-duration">💎 365 Ngày</span>
+                        </div>
+                        <ul class="features-list">
+                            <li><strong>Chi phí tối ưu nhất (VIP)</strong></li>
+                            <li>Hỗ trợ ưu tiên qua Zalo 1-1</li>
+                            <li>Backup dữ liệu an toàn</li>
+                            <li>Cập nhật tính năng mới Free</li>
+                        </ul>
+                        <button class="cta-button outline" onclick="openPayment('Gói 1 Năm', 3960000)">
+                            Chọn Gói Này
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Thanh Toán -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-background" onclick="closeModal()"></div>
+        <div class="modal-card">
+            <header class="modal-card-head pt-3 pb-3">
+                <p class="modal-card-title has-text-centered is-size-5 has-text-weight-bold mb-0">💳 THANH TOÁN DỊCH VỤ</p>
+                <button class="delete" aria-label="close" onclick="closeModal()"></button>
+            </header>
+            <section class="modal-card-body has-text-centered pt-4 pb-5 pl-5 pr-5">
+                
+                <!-- Box thông tin gói -->
+                <div class="notification is-success is-light mb-4 p-3 is-flex is-justify-content-center is-align-items-center is-flex-direction-column">
+                    <p class="mb-1">Bạn đang đăng ký gói:</p>
+                    <strong id="selectedPackage" class="is-size-4 has-text-dark"></strong>
+                    <div class="is-size-3 has-text-success has-text-weight-bold mt-1" id="selectedPrice"></div>
+                </div>
+                
+                <h5 class="subtitle is-6 mb-3 has-text-weight-bold has-text-grey">🔻 Thông tin chuyển khoản:</h5>
+                
+                <!-- Box Bank Info - Cố định kích thước để không vỡ -->
+                <div class="box has-background-white p-4 mb-4" style="border: 2px dashed #b5b5b5; max-width: 320px; margin: 0 auto;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+                        <span class="has-text-weight-bold has-text-info">Ngân hàng:</span>
+                        <span class="has-text-weight-bold" style="color: #103289;">MB BANK</span>
+                    </div>
+                    
+                    <div class="field mb-2">
+                        <label class="label is-small has-text-left has-text-grey mb-1">Số tài khoản:</label>
+                        <div class="control">
+                             <input class="input is-medium has-text-centered has-text-weight-bold is-family-monospace" type="text" value="0386996898" readonly style="border: 1px solid #ddd; background: #f9f9f9; color: #2d3436;">
+                        </div>
+                    </div>
+
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+                        <span class="has-text-weight-bold has-text-info is-size-7">Chủ TK:</span>
+                        <span class="has-text-weight-bold is-uppercase is-size-7">TRAN HUY HOANG</span>
+                    </div>
+                    
+                    <hr class="my-3" style="background-color: #eee;">
+                    
+                    <div class="field mb-0">
+                        <label class="label is-small has-text-left has-text-grey mb-1">Nội dung CK (Bắt buộc):</label>
+                        <div class="control">
+                            <input class="input is-small has-text-centered has-text-weight-bold has-text-link" type="text" value="SDT CUA BAN + TEN GOI" readonly style="border: 1px solid #4facfe;">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="is-size-7 has-text-grey mb-3">
+                    Sau khi chuyển khoản thành công,<br>vui lòng nhắn tin Zalo cho Admin để nhận tài khoản.
+                </p>
+
+                <div class="buttons is-centered">
+                    <a href="https://zalo.me/0386996898" target="_blank" class="button is-info is-rounded is-medium is-fullwidth" style="max-width: 320px; background-color: #0068ff; border-color: #0068ff;">
+                        <span class="icon is-medium">
+                            <img src="image/zalo.png" alt="Zalo" style="max-height: 24px;">
+                        </span>
+                        <strong>Xác nhận qua Zalo</strong>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('paymentModal');
+        
+        function openPayment(pkgName, price) {
+            document.getElementById('selectedPackage').textContent = pkgName;
+            document.getElementById('selectedPrice').textContent = price.toLocaleString('vi-VN') + 'đ';
+            modal.classList.add('is-active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-active');
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if(e.key === "Escape"){
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng vàng Đoàn viên - Sinh hoạt đoàn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .star-badge { color: #f1c40f; font-weight: bold; font-size: 1.1em; }
+        .gold-row { background-color: #fffdf5; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar is-white shadow-sm">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="navbar-item has-text-primary" href="index.html">
+                    <span class="icon mr-2"><i class="fas fa-chevron-left"></i></span>
+                    Trang chủ
+                </a>
+                <div class="navbar-item has-text-weight-bold ml-auto">
+                    BẢNG VÀNG THÀNH TÍCH
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section">
+        <div class="container">
+            
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    
+                    <div class="has-text-centered mb-5">
+                        <h1 class="title is-3 has-text-primary">Danh sách Đoàn viên</h1>
+                        <p class="subtitle is-6">Tra cứu thông tin và số sao tích lũy</p>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="field has-addons mb-5">
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-rounded" type="text" id="publicSearch" placeholder="Nhập tên hoặc số điện thoại để tra cứu...">
+                            <span class="icon is-small is-left"><i class="fas fa-search"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="box p-0">
+                        <div class="table-container">
+                            <table class="table is-fullwidth is-striped is-hoverable">
+                                <thead>
+                                    <tr>
+                                        <th>Họ và tên</th>
+                                        <th>Năm sinh</th>
+                                        <th>Trường/Lớp</th>
+                                        <th>Sao vàng</th>
+                                        <th>SĐT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="publicList">
+                                    <tr><td colspan="5" class="has-text-centered p-4">Đang tải dữ liệu...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="has-text-centered mt-4">
+                        <p class="is-size-7 has-text-grey">
+                            * Số điện thoại đã được ẩn 3 số cuối để bảo mật thông tin.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/config.js"></script>
+
+    <script>
+        let allMembers = [];
+
+        // Fetch Data
+        db.ref('sinhhoatdoan/members').on('value', snap => {
+            const data = snap.val();
+            if (!data) {
+                allMembers = [];
+                renderList([]);
+                return;
+            }
+            // Convert object to array
+            allMembers = Object.values(data);
+            // Sort by stars descending
+            allMembers.sort((a, b) => (b.stars || 0) - (a.stars || 0));
+            
+            renderList(allMembers);
+        });
+
+        // Render List
+        function renderList(list) {
+            const container = document.getElementById('publicList');
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = '<tr><td colspan="5" class="has-text-centered p-4">Không tìm thấy dữ liệu</td></tr>';
+                return;
+            }
+
+            list.forEach(mem => {
+                const tr = document.createElement('tr');
+                // Mask phone: 0912345678 -> 0912345***
+                let displayPhone = mem.phone || "";
+                if (displayPhone.length > 3) {
+                    displayPhone = displayPhone.substring(0, displayPhone.length - 3) + "***";
+                }
+
+                // School/Class display
+                let schoolClass = "";
+                if (mem.school) schoolClass += mem.school;
+                if (mem.className) schoolClass += (schoolClass ? ` - ${mem.className}` : mem.className);
+                if (!schoolClass) schoolClass = mem.group || "-";
+
+                tr.innerHTML = `
+                    <td class="has-text-weight-semibold">${mem.fullName}</td>
+                    <td>${mem.birthYear}</td>
+                    <td>${schoolClass}</td>
+                    <td><span class="star-badge"><i class="fas fa-star"></i> ${mem.stars || 0}</span></td>
+                    <td>${displayPhone}</td>
+                `;
+                container.appendChild(tr);
+            });
+        }
+
+        // Search Logic
+        document.getElementById('publicSearch').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            if (!term) {
+                renderList(allMembers);
+                return;
+            }
+
+            const filtered = allMembers.filter(m => {
+                return (m.fullName && m.fullName.toLowerCase().includes(term)) ||
+                       (m.phone && m.phone.includes(term));
+            });
+            renderList(filtered);
+        });
+    </script>
+</body>
+</html>

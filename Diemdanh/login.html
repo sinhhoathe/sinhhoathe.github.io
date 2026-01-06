@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Ban Tổ chức</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">🎯</div>
+        <div class="card">
+            <div class="card-content">
+                <h1 class="title is-4 has-text-centered" style="color: #667eea;">
+                    Đăng nhập Ban Tổ chức
+                </h1>
+                <p class="subtitle is-6 has-text-centered has-text-grey">
+                    Hệ thống điểm danh GPS
+                </p>
+
+                <form id="loginForm">
+                    <div class="field">
+                        <label class="label">Tên đăng nhập</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="text" id="username" placeholder="Nhập tên đăng nhập" required autofocus>
+                            <span class="icon is-small is-left">
+                                <span>👤</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Mật khẩu</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" id="password" placeholder="Nhập mật khẩu" required>
+                            <span class="icon is-small is-left">
+                                <span>🔒</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field" id="errorBox" style="display: none;">
+                        <div class="notification is-danger is-light">
+                            <p id="errorText"></p>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button type="submit" class="button is-primary is-fullwidth is-medium" id="loginBtn">
+                                <span class="icon">
+                                    <span>🔓</span>
+                                </span>
+                                <span>Đăng nhập</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr>
+                <div class="has-text-centered">
+                    <a href="dich-vu.html" class="button is-text is-small">Xem bảng giá</a> | 
+                    <a href="#" onclick="alert('Vui lòng liên hệ Admin để cấp lại mật khẩu:\nSĐT/Zalo: 0386996898')" class="button is-text is-small">Quên mật khẩu?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase.config.js"></script>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorBox = document.getElementById('errorBox');
+        const errorText = document.getElementById('errorText');
+
+        // Check login status
+        if (sessionStorage.getItem('btc_logged_in') === 'true') {
+            window.location.href = 'btc-list.html';
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorBox.style.display = 'block';
+        }
+
+        function hideError() {
+            errorBox.style.display = 'none';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            loginBtn.classList.add('is-loading');
+            loginBtn.disabled = true;
+
+            try {
+                // Check against Firebase Database
+                const snapshot = await firebase.database().ref(`users/${username}`).once('value');
+                const user = snapshot.val();
+
+                if (!user) {
+                    throw new Error('Tài khoản không tồn tại!');
+                }
+
+                if (user.password !== password) {
+                    throw new Error('Mật khẩu không đúng!');
+                }
+
+                if (user.expiryDate && Date.now() > user.expiryDate) {
+                    const expiryDate = new Date(user.expiryDate).toLocaleDateString('vi-VN');
+                    throw new Error(`Tài khoản đã hết hạn vào ngày ${expiryDate}.\nVui lòng liên hệ Admin để gia hạn.`);
+                }
+
+                // Success
+                sessionStorage.setItem('btc_logged_in', 'true');
+                sessionStorage.setItem('btc_username', username);
+                sessionStorage.setItem('btc_login_time', new Date().toISOString());
+                
+                window.location.href = 'btc-list.html';
+
+            } catch (error) {
+                showError('❌ ' + error.message);
+                loginBtn.classList.remove('is-loading');
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

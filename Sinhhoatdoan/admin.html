@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị - Sinh hoạt đoàn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar { background: #fff; height: 100vh; border-right: 1px solid #eee; padding-top: 1rem; }
+        .sidebar-item { padding: 1rem; cursor: pointer; border-left: 3px solid transparent; }
+        .sidebar-item:hover { background: #f9f9f9; }
+        .sidebar-item.is-active { border-left-color: var(--primary-color); background: #f0fdfa; font-weight: bold; color: var(--primary-color); }
+        .star-box { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="hero is-fullheight">
+        <div class="hero-body">
+            <div class="container" style="max-width: 400px;">
+                <div class="card p-5 animate-fade-in">
+                    <div class="has-text-centered mb-4">
+                        <span class="icon is-large has-text-primary"><i class="fas fa-shield-alt fa-3x"></i></span>
+                        <h1 class="title is-4 mt-3">Đăng nhập Quản trị</h1>
+                    </div>
+                    <form id="loginForm">
+                        <div class="field">
+                            <label class="label">Mật khẩu</label>
+                            <div class="control has-icons-left">
+                                <input class="input" type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị" required>
+                                <span class="icon is-small is-left"><i class="fas fa-lock"></i></span>
+                            </div>
+                        </div>
+                        <button type="submit" class="button is-primary is-fullwidth mt-4">Truy cập</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboardSection" class="is-hidden">
+        <div class="columns is-gapless mb-0">
+            <!-- Sidebar -->
+            <div class="column is-2 sidebar is-hidden-touch">
+                <div class="has-text-centered mb-5 px-2">
+                    <h2 class="title is-5 has-text-primary">Admin Panel</h2>
+                    <p class="is-size-7">Đoàn phường Lào Cai</p>
+                </div>
+                <div class="sidebar-item is-active" onclick="switchTab('members')">
+                    <i class="fas fa-users mr-2"></i> Thành viên
+                </div>
+                <div class="sidebar-item" onclick="switchTab('events')">
+                    <i class="fas fa-calendar-check mr-2"></i> Buổi Sinh hoạt
+                </div>
+                <div class="sidebar-item has-text-danger mt-5" onclick="doLogout()">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="column is-10 has-background-light" style="min-height: 100vh;">
+                <nav class="navbar is-white shadow-sm mb-4 px-4">
+                    <div class="navbar-brand">
+                        <div class="navbar-item is-hidden-desktop" onclick="document.querySelector('.sidebar').classList.toggle('is-hidden-touch')">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                        <div class="navbar-item has-text-weight-bold" id="pageTitle">Quản lý Thành viên</div>
+                    </div>
+                </nav>
+
+                <div class="p-4 container is-fluid">
+                    
+                    <!-- TAB: MEMBERS -->
+                    <div id="tabMembers">
+                        <div class="level">
+                            <div class="level-left">
+                                <div class="field has-addons">
+                                    <p class="control">
+                                        <input class="input" type="text" id="paramSearch" placeholder="Tìm theo tên/SĐT...">
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-info">Tìm</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <button class="button is-success is-light" onclick="exportExcel()">
+                                    <i class="fas fa-file-excel mr-2"></i> Xuất Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-content p-0">
+                                <div class="table-container">
+                                    <table class="table is-fullwidth is-striped is-hoverable">
+                                        <thead>
+                                            <tr>
+                                                <th>Họ và tên</th>
+                                                <th>Năm sinh</th>
+                                                <th>Trường/Lớp</th>
+                                                <th>SĐT</th>
+                                                <th>Sao vàng</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="memberList">
+                                            <!-- JS render -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: EVENTS -->
+                    <div id="tabEvents" class="is-hidden">
+                        <div class="level">
+                            <div class="level-left">
+                                <h2 class="subtitle">Danh sách sự kiện</h2>
+                            </div>
+                            <div class="level-right">
+                                <button class="button is-primary" onclick="openCreateEventModal()">
+                                    <i class="fas fa-plus mr-2"></i> Tạo buổi mới
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="eventList" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                            <!-- JS Render Cards -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE EVENT -->
+    <div id="eventModal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title" id="modalTitle">Tạo buổi sinh hoạt mới</p>
+                <button class="delete" aria-label="close" onclick="closeModal('eventModal')"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="createEventForm">
+                    <div class="field">
+                        <label class="label">Tên buổi sinh hoạt</label>
+                        <div class="control">
+                            <input class="input" type="text" id="evtName" placeholder="VD: Sinh hoạt hè T7/2026" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Mô tả buổi sinh hoạt</label>
+                        <div class="control">
+                            <textarea class="textarea" id="evtDesc" placeholder="Nhập nội dung, địa chỉ hoặc lưu ý cho buổi sinh hoạt..." rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Bán kính (m)</label>
+                                <div class="control">
+                                    <input class="input" type="number" id="evtRadius" value="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Vĩ độ (Lat)</label>
+                                <div class="control">
+                                    <input class="input" type="number" step="any" id="evtLat" placeholder="VD: 21.123">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-4">
+                            <div class="field">
+                                <label class="label">Kinh độ (Lng)</label>
+                                <div class="control">
+                                    <input class="input" type="number" step="any" id="evtLng" placeholder="VD: 105.123">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="field">
+                            <button type="button" class="button is-info is-small is-outlined" onclick="getAdminGPS()">
+                                <i class="fas fa-map-marker-alt mr-1"></i> Lấy tọa độ hiện tại (GPS)
+                            </button>
+                            <p class="help is-success is-hidden" id="gpsMsg">
+                                <span class="icon"><i class="fas fa-check"></i></span>
+                                Đã lấy tọa độ! (Sai số: <span id="accVal"></span>m)
+                            </p>
+                            <p class="help">
+                                <a id="mapLink" href="#" target="_blank" class="is-hidden">
+                                    <i class="fas fa-map-marked-alt"></i> Xem vị trí trên Google Maps
+                                </a>
+                            </p>
+                            <article class="message is-warning is-small mt-2" id="gpsWarning">
+                                <div class="message-body">
+                                    <strong>Lưu ý:</strong> GPS trên máy tính thường bị lệch 50-200m do dùng định vị mạng. 
+                                    <br>Nên dùng <strong>Điện thoại</strong> để lấy tọa độ chính xác nhất!
+                                </div>
+                            </article>
+                        </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" onclick="saveEvent()">Lưu thông tin</button>
+                <button class="button" onclick="closeModal('eventModal')">Hủy</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/config.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        const ADMIN_PASS = "tranhuyhoang";
+        let CURRENT_GPS = null;
+
+        // AUTH LOGIC
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASS) {
+                sessionStorage.setItem('shd_admin', 'true');
+                showDashboard();
+            } else {
+                alert('Mật khẩu không đúng!');
+            }
+        });
+
+        function checkAuth() {
+            if (sessionStorage.getItem('shd_admin') === 'true') {
+                showDashboard();
+            }
+        }
+        
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('is-hidden');
+            document.getElementById('dashboardSection').classList.remove('is-hidden');
+            loadMembers();
+            loadEvents();
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('shd_admin');
+            location.reload();
+        }
+
+        // TABS LOGIC
+        function switchTab(tabName) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('is-active'));
+            event.currentTarget.classList.add('is-active');
+            
+            if (tabName === 'members') {
+                document.getElementById('tabMembers').classList.remove('is-hidden');
+                document.getElementById('tabEvents').classList.add('is-hidden');
+                document.getElementById('pageTitle').textContent = 'Quản lý Thành viên';
+            } else {
+                document.getElementById('tabMembers').classList.add('is-hidden');
+                document.getElementById('tabEvents').classList.remove('is-hidden');
+                document.getElementById('pageTitle').textContent = 'Quản lý Buổi sinh hoạt';
+            }
+        }
+
+        // --- MEMBER LOGIC ---
+        let adminMembers = []; // Store for search
+
+        function loadMembers() {
+            db.ref('sinhhoatdoan/members').on('value', snap => {
+                const data = snap.val();
+                if (!data) {
+                    adminMembers = [];
+                } else {
+                    adminMembers = Object.entries(data).map(([key, val]) => ({...val, key}));
+                    // Sort by stars descending
+                    adminMembers.sort((a, b) => (b.stars || 0) - (a.stars || 0));
+                }
+                renderAdminMembers(adminMembers);
+            });
+        }
+
+        function renderAdminMembers(list) {
+            const container = document.getElementById('memberList');
+            container.innerHTML = '';
+            
+            if (list.length === 0) {
+                container.innerHTML = '<tr><td colspan="8" class="has-text-centered">Chưa có thành viên nào</td></tr>';
+                return;
+            }
+
+            list.forEach(mem => {
+                // SchoolClass
+                let sc = "";
+                if (mem.school) sc += mem.school;
+                if (mem.className) sc += (sc ? ` - ${mem.className}` : mem.className);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${mem.fullName}</strong></td>
+                    <td>${mem.birthYear}</td>
+                    <td>${sc}</td>
+                    <td>${mem.phone}</td>
+                    <td><div class="star-box"><i class="fas fa-star"></i> ${mem.stars || 0}</div></td>
+                    <td><span class="tag ${mem.status === 'active' ? 'is-success' : 'is-dark'} is-light">${mem.status}</span></td>
+                    <td>
+                        <div class="buttons are-small">
+                            <button class="button is-danger is-light" onclick="deleteMember('${mem.key}')">Xóa</button>
+                            <button class="button is-warning is-light" onclick="adjustStar('${mem.key}', ${mem.stars || 0})">+ Sao</button>
+                        </div>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Search Admin - Realtime
+        document.getElementById('paramSearch').addEventListener('input', (e) => {
+             const term = e.target.value.toLowerCase().trim();
+             if (!term) {
+                 renderAdminMembers(adminMembers);
+                 return;
+             }
+             const filtered = adminMembers.filter(m => 
+                (m.fullName && m.fullName.toLowerCase().includes(term)) ||
+                (m.phone && m.phone.includes(term))
+             );
+             renderAdminMembers(filtered);
+        });
+
+
+        function deleteMember(key) {
+            if (confirm('Bạn có chắc muốn xóa thành viên này?')) {
+                db.ref(`sinhhoatdoan/members/${key}`).remove();
+            }
+        }
+
+        function adjustStar(key, currentStars) {
+            const newStars = prompt("Nhập số sao mới:", currentStars + 1);
+            if (newStars !== null) {
+                db.ref(`sinhhoatdoan/members/${key}`).update({ stars: parseInt(newStars) });
+            }
+        }
+
+        // --- EVENT LOGIC ---
+        let editingEventKey = null;
+
+        function loadEvents() {
+            db.ref('sinhhoatdoan/events').on('value', snap => {
+                const list = document.getElementById('eventList');
+                list.innerHTML = '';
+                const data = snap.val();
+
+                if (!data) return;
+
+                // Sort by time descending (newest first)
+                const sortedEvents = Object.entries(data).sort((a,b) => b[1].startTime - a[1].startTime);
+
+                sortedEvents.forEach(([key, evt]) => {
+                    const card = document.createElement('div');
+                    card.className = 'animate-fade-in';
+                    // Show current status correctly
+                    const statusClass = evt.isOpen ? 'is-success' : 'is-danger';
+                    const statusText = evt.isOpen ? 'Đang mở' : 'Đã đóng';
+                    
+                    card.innerHTML = `
+                        <div class="card h-100">
+                            <header class="card-header has-background-light">
+                                <p class="card-header-title">${evt.name}</p>
+                            </header>
+                            <div class="card-content">
+                                <div class="tags are-medium">
+                                    <span class="tag ${statusClass}">${statusText}</span>
+                                    <span class="tag is-info is-light">${new Date(evt.startTime).toLocaleDateString('vi-VN')}</span>
+                                </div>
+                                <div class="content is-size-7 mt-3">
+                                    <div class="mb-2">
+                                        <strong>Mô tả:</strong> 
+                                        <div class="description-wrapper mt-1">
+                                            <span class="desc-content preserve-newline" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">${evt.description || 'Không có mô tả'}</span>
+                                            ${evt.description && evt.description.length > 80 ? `
+                                                <a href="javascript:void(0)" class="has-text-link" onclick="const s = this.previousElementSibling.style; if(s.display === '-webkit-box') { s.display = 'block'; this.innerText = 'Thu gọn'; } else { s.display = '-webkit-box'; this.innerText = 'Xem thêm'; }">Xem thêm</a>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <p><i class="fas fa-map-marker-alt"></i> BK: ${evt.radius}m</p>
+                                    <p>
+                                        <a href="https://www.google.com/maps?q=${evt.location?.lat},${evt.location?.lng}" target="_blank" class="has-text-link">
+                                            <i class="fas fa-directions"></i> Xem vị trí trên Google Maps
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                            <footer class="card-footer">
+                                <a href="#" class="card-footer-item has-text-primary" onclick="toggleEvent('${key}', ${!evt.isOpen})">
+                                    ${evt.isOpen ? '🔒 Đóng' : '🔓 Mở'}
+                                </a>
+                                <a href="#" class="card-footer-item has-text-info" onclick='openEditEventModal("${key}", ${JSON.stringify(evt)})'>
+                                    ✏️ Sửa
+                                </a>
+                                <a href="#" class="card-footer-item has-text-danger" onclick="deleteEvent('${key}')">Xóa</a>
+                            </footer>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+            });
+        }
+
+        function openCreateEventModal() {
+            editingEventKey = null;
+            document.getElementById('modalTitle').textContent = "Tạo buổi sinh hoạt mới";
+            document.getElementById('createEventForm').reset();
+            document.getElementById('eventModal').classList.add('is-active');
+            document.getElementById('gpsMsg').classList.add('is-hidden');
+            CURRENT_GPS = null;
+        }
+
+        function openEditEventModal(key, evt) {
+            editingEventKey = key;
+             document.getElementById('modalTitle').textContent = "Cập nhật buổi sinh hoạt";
+            document.getElementById('evtName').value = evt.name;
+            document.getElementById('evtDesc').value = evt.description || "";
+            document.getElementById('evtRadius').value = evt.radius;
+            // Fill Coordinates
+            if (evt.location) {
+                CURRENT_GPS = evt.location;
+                document.getElementById('evtLat').value = evt.location.lat;
+                document.getElementById('evtLng').value = evt.location.lng;
+                
+                // Show Map Link for stored location
+                const mapUrl = `https://www.google.com/maps?q=${evt.location.lat},${evt.location.lng}`;
+                const link = document.getElementById('mapLink');
+                link.href = mapUrl;
+                link.innerHTML = `<i class="fas fa-map-marked-alt"></i> Xem vị trí này trên Google Maps`;
+                link.classList.remove('is-hidden');
+            }
+            document.getElementById('eventModal').classList.add('is-active');
+        }        
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('is-active');
+        }
+
+        function getAdminGPS() {
+            if (!navigator.geolocation) return alert('Trình duyệt không hỗ trợ GPS');
+            
+            const btn = event.currentTarget;
+            btn.classList.add('is-loading');
+            
+            navigator.geolocation.getCurrentPosition(pos => {
+                CURRENT_GPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                const acc = Math.round(pos.coords.accuracy);
+                
+                document.getElementById('evtLat').value = CURRENT_GPS.lat;
+                document.getElementById('evtLng').value = CURRENT_GPS.lng;
+                
+                // Show Msg & Accuracy
+                document.getElementById('gpsMsg').classList.remove('is-hidden');
+                document.getElementById('accVal').textContent = acc;
+                btn.classList.remove('is-loading');
+
+                // Color code accuracy
+                const msgEl = document.getElementById('gpsMsg');
+                if (acc < 50) {
+                    msgEl.className = "help is-success";
+                } else if (acc < 200) {
+                    msgEl.className = "help is-warning";
+                } else {
+                    msgEl.className = "help is-danger";
+                }
+
+                // Show Map Link
+                const mapUrl = `https://www.google.com/maps?q=${CURRENT_GPS.lat},${CURRENT_GPS.lng}`;
+                const link = document.getElementById('mapLink');
+                link.href = mapUrl;
+                link.classList.remove('is-hidden');
+
+            }, err => {
+                btn.classList.remove('is-loading');
+                alert("Lỗi lấy GPS: " + err.message + "\n\nLưu ý: Bạn phải cho phép quyền vị trí trên trình duyệt và nên dùng điện thoại.");
+            }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+        }
+
+        function saveEvent() {
+            const name = document.getElementById('evtName').value;
+            const description = document.getElementById('evtDesc').value;
+            const radius = document.getElementById('evtRadius').value;
+            // Read from hidden/visible inputs in case user edited them manually (if we added visible inputs)
+            // But here we rely on hidden inputs updated by getAdminGPS or set by logic.
+            // Requirement: "cho phép admin chỉnh sửa vị trí nữa nhé, xem tọa độ chi tiết".
+            // So we really should have visible inputs for manual edit if needed.
+            
+            const latInput = parseFloat(document.getElementById('evtLat').value);
+            const lngInput = parseFloat(document.getElementById('evtLng').value);
+
+            if (!name) return alert("Vui lòng nhập tên");
+            if (!latInput || !lngInput) return alert("Vui lòng lấy tọa độ hoặc nhập tọa độ!");
+
+            const eventData = {
+                name,
+                description,
+                radius: parseInt(radius),
+                location: { lat: latInput, lng: lngInput }
+            };
+
+            if (editingEventKey) {
+                // Update
+                db.ref(`sinhhoatdoan/events/${editingEventKey}`).update(eventData);
+            } else {
+                // Create
+                db.ref('sinhhoatdoan/events').push({
+                    ...eventData,
+                    isOpen: true,
+                    startTime: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+
+            closeModal('eventModal');
+        }
+
+        function toggleEvent(key, newState) {
+            db.ref(`sinhhoatdoan/events/${key}`).update({ isOpen: newState });
+        }
+        
+        function deleteEvent(key) {
+            if (confirm("Xóa sự kiện này?")) {
+                db.ref(`sinhhoatdoan/events/${key}`).remove();
+            }
+        }
+
+        // --- EXPORT EXCEL ---
+        function exportExcel() {
+            // Simple Export implementation
+            const table = document.querySelector('table');
+            const wb = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(wb, 'DanhSach_SinhHoatDoan.xlsx');
+        }
+
+        // Init
+        checkAuth();
+    </script>
+</body>
+</html>

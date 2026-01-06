@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý hội nghị - Ban Tổ chức</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .navbar-item, .navbar-link {
+            color: white !important;
+        }
+        .conference-card {
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .conference-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .conference-card.is-active {
+            border: 3px solid #667eea;
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation">
+        <div class="navbar-brand">
+            <div class="navbar-item">
+                <strong style="color: white;">🎯 Quản lý hội nghị</strong>
+            </div>
+        </div>
+        <div class="navbar-menu">
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <span style="color: white; margin-right: 1rem;">👤 <span id="usernameDisplay"></span></span>
+                </div>
+                <div class="navbar-item">
+                    <button class="button is-light is-small" id="logoutBtn">
+                        🚪 Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Check Script -->
+    <script>
+        // Check if logged in
+        if (sessionStorage.getItem('btc_logged_in') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Display username
+        const username = sessionStorage.getItem('btc_username') || 'Admin';
+        document.getElementById('usernameDisplay').textContent = username;
+        
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <section class="section">
+        <div class="container">
+            <!-- Header -->
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <h1 class="title">📋 Danh sách hội nghị</h1>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <button class="button is-primary" id="btnCreateConference">
+                            ➕ Tạo hội nghị mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conference List -->
+            <div id="conferenceList" class="columns is-multiline">
+                <div class="column is-12">
+                    <div class="has-text-centered" style="padding: 3rem;">
+                        <p class="has-text-grey">Đang tải danh sách hội nghị...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Create/Edit Conference -->
+    <div class="modal" id="conferenceModal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head" style="background: #667eea;">
+                <p class="modal-card-title" style="color: white;" id="modalTitle">Tạo hội nghị mới</p>
+                <button class="delete" aria-label="close" id="closeModal"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="conferenceForm">
+                    <div class="field">
+                        <label class="label">Tên hội nghị <span style="color: red;">*</span></label>
+                        <div class="control">
+                            <input class="input" type="text" id="conferenceName" placeholder="Hội nghị Tổng kết 2026" required>
+                        </div>
+                    </div>
+
+
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Vĩ độ (Latitude)</label>
+                                <div class="control">
+                                    <input class="input" type="number" step="0.000001" id="latitude" placeholder="21.0285">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Kinh độ (Longitude)</label>
+                                <div class="control">
+                                    <input class="input" type="number" step="0.000001" id="longitude" placeholder="105.8542">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Bán kính cho phép (mét)</label>
+                        <div class="control">
+                            <input class="input" type="number" id="radius" placeholder="100" value="100">
+                        </div>
+                    </div>
+
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Thời gian bắt đầu</label>
+                                <div class="control">
+                                    <input class="input" type="datetime-local" id="startTime">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Thời gian kết thúc</label>
+                                <div class="control">
+                                    <input class="input" type="datetime-local" id="endTime">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <label class="checkbox">
+                                <input type="checkbox" id="isOpen">
+                                <strong> Mở điểm danh</strong>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button type="button" class="button is-info is-small" id="getCurrentLocation">
+                                📍 Lấy vị trí hiện tại
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" id="btnSaveConference">💾 Lưu</button>
+                <button class="button" id="btnCancelModal">Hủy</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase.config.js"></script>
+    <script src="btc-list.js"></script>
+</body>
+</html>

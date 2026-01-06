@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cổng thông tin Đoàn phường - Sinh hoạt đoàn</title>
+    <!-- Bulma CSS CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <!-- FontAwesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar is-white" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item has-text-primary" href="index.html">
+            <span class="icon mr-2"><i class="fas fa-seedling"></i></span>
+            ĐOÀN PHƯỜNG LÀO CAI
+          </a>
+        </div>
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <a href="admin.html" class="button is-light is-small">
+                <span class="icon"><i class="fas fa-user-shield"></i></span>
+                <span>Quản trị viên</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero is-medium has-bg-gradient mb-5">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title is-2 has-text-white animate-fade-in">
+            HỆ THỐNG QUẢN LÝ SINH HOẠT ĐOÀN
+          </h1>
+          <h2
+            class="subtitle is-5 has-text-white mt-3 animate-fade-in"
+            style="opacity: 0.9"
+          >
+            Kết nối - Tiên phong - Bản lĩnh
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Actions -->
+    <section class="section mt-0 pt-0" style="margin-top: -3rem">
+      <div class="container">
+        <div class="columns is-multiline is-centered">
+          <!-- Card 1: Đăng ký thành viên -->
+          <div class="column is-4">
+            <div
+              class="card p-4 h-100 animate-fade-in"
+              style="animation-delay: 0.1s"
+            >
+              <div class="card-content has-text-centered">
+                <span class="icon is-large has-text-info mb-3">
+                  <i class="fas fa-user-plus fa-3x"></i>
+                </span>
+                <p class="title is-4">Đăng ký Sinh hoạt Đoàn
+                <p class="subtitle is-6 mt-2">
+                  Dành cho các bạn chưa có tên trong danh sách quản lý.
+                </p>
+                <a
+                  href="register.html"
+                  class="button is-info is-fullwidth is-rounded mt-4"
+                >
+                  📝 Đăng ký ngay
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Điểm danh -->
+          <div class="column is-4">
+            <div
+              class="card p-4 h-100 animate-fade-in"
+              style="animation-delay: 0.2s"
+            >
+              <div class="card-content has-text-centered">
+                <span class="icon is-large has-text-success mb-3">
+                  <i class="fas fa-map-marker-alt fa-3x"></i>
+                </span>
+                <p class="title is-4">Điểm danh Sinh hoạt</p>
+                <p class="subtitle is-6 mt-2">
+                  Check-in tham gia buổi sinh hoạt đoàn tại địa điểm tổ chức.
+                </p>
+                <a
+                  href="attendance.html"
+                  class="button is-success is-fullwidth is-rounded mt-4"
+                >
+                  📍 Điểm danh
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Tra cứu (Optional) -->
+          <div class="column is-4">
+            <div
+              class="card p-4 h-100 animate-fade-in"
+              style="animation-delay: 0.3s"
+            >
+              <div class="card-content has-text-centered">
+                <span class="icon is-large has-text-warning mb-3">
+                  <i class="fas fa-calendar-alt fa-3x"></i>
+                </span>
+                <p class="title is-4">Bảng vàng Thành tích</p>
+                <p class="subtitle is-6 mt-2">
+                  Tra cứu danh sách Đoàn viên và số sao tích lũy.
+                </p>
+                <a href="members.html" class="button is-warning is-fullwidth is-rounded mt-4">
+                  🏆 Xem bảng vàng
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer has-background-white">
+      <div class="content has-text-centered">
+        <p>
+          <strong>Hệ thống quản lý Sinh hoạt đoàn</strong> được xây dựng bởi
+          <a href="#">Đoàn thanh niên</a>.
+          <br />
+          © 2026 All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đoàn phường - Danh sách đăng ký</title>
+    <link rel="stylesheet" href="/Sinhhoathe/main.css" />
+    <style>
+      body {
+        background: #f7f8fc;
+      }
+      .container {
+        max-width: 1100px;
+      }
+      .card {
+        border-radius: 14px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+      }
+      .table th,
+      .table td {
+        vertical-align: middle;
+      }
+      /* Compact table for registrations */
+      .compact-table.table td,
+      .compact-table.table th {
+        padding: 6px 8px;
+      }
+      .compact-table {
+        font-size: 0.9rem;
+      }
+    </style>
+    <link rel="icon" href="/assets/images/ballbang_favicon.png" />
+  </head>
+  <body>
+    <!-- Admin access gate -->
+    <section id="adminGate" class="section" style="display: none">
+      <div class="container" style="max-width: 420px">
+        <div class="card">
+          <div class="card-content">
+            <h2 class="title is-5">Đoàn phường - Đăng nhập</h2>
+            <div class="field">
+              <label class="label">ID</label>
+              <div class="control">
+                <input id="gateId" class="input" placeholder="Nhập ID:..." />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Mật khẩu</label>
+              <div class="control">
+                <input
+                  id="gatePass"
+                  class="input"
+                  type="password"
+                  placeholder="Nhập mật khẩu"
+                />
+              </div>
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <button id="btnGateLogin" class="button is-primary">
+                  Đăng nhập
+                </button>
+              </div>
+            </div>
+            <p id="gateErr" class="help is-danger" style="display: none">
+              Sai ID hoặc mật khẩu.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="adminApp" class="section" style="display: none">
+      <div class="container">
+        <div class="level">
+          <div class="level-left">
+            <div>
+              <h1 class="title is-3">Đoàn phường</h1>
+              <p class="subtitle is-6">
+                Quản lý toàn bộ hệ thống đăng ký sinh hoạt hè.
+              </p>
+            </div>
+          </div>
+          <div class="level-right">
+            <button id="btnLogoutAdmin" class="button is-light">
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs is-boxed is-medium">
+          <ul>
+            <li class="is-active" data-tab="registrations">
+              <a>
+                <span>📋 Danh sách đăng ký</span>
+              </a>
+            </li>
+            <li data-tab="categories">
+              <a>
+                <span>🏫 Quản lý danh mục</span>
+              </a>
+            </li>
+            <li data-tab="passwords">
+              <a>
+                <span>🔑 Thiết lập mật khẩu</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tab Content: Danh sách đăng ký -->
+        <div id="tabRegistrations" class="tab-content">
+          <div class="card">
+            <div class="card-content">
+              <div class="level">
+                <div class="level-left">
+                  <h2 class="title is-5">
+                    Danh sách đăng ký
+                    <span
+                      id="countBadge"
+                      class="tag is-info is-light"
+                      style="margin-left: 8px"
+                      >0/0</span
+                    >
+                  </h2>
+                </div>
+                <div class="level-right">
+                  <div class="field has-addons">
+                    <p class="control">
+                      <span class="select">
+                        <select id="filterField">
+                          <option value="school">Trường học</option>
+                          <option value="hamlet">Thôn/Tổ</option>
+                        </select>
+                      </span>
+                    </p>
+                    <p class="control">
+                      <input
+                        id="filterValue"
+                        class="input"
+                        placeholder="Lọc theo trường học"
+                      />
+                    </p>
+                    <p class="control">
+                      <button id="btnReload" class="button is-light">
+                        Tải lại
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table
+                  class="table is-fullwidth is-striped is-hoverable is-narrow compact-table"
+                >
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Trường</th>
+                      <th>Họ và tên</th>
+                      <th>Năm sinh</th>
+                      <th>Địa chỉ</th>
+                      <th>Phụ huynh</th>
+                      <th>Điện thoại PH</th>
+                      <th>Xếp loại</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Quản lý danh mục -->
+        <div id="tabCategories" class="tab-content" style="display: none">
+          <div class="card">
+            <div class="card-content">
+              <h2 class="title is-5">Quản lý danh mục (ADMIN)</h2>
+              <p class="subtitle is-6">
+                Thêm/xóa trường học, xã/phường, và thôn/tổ dân phố.
+              </p>
+
+              <div class="columns">
+                <div class="column is-4">
+                  <div class="box">
+                    <h3 class="title is-6">Trường học</h3>
+                    <div class="field has-addons">
+                      <p class="control is-expanded">
+                        <input
+                          id="inpSchool"
+                          class="input"
+                          placeholder="Nhập tên trường"
+                        />
+                      </p>
+                      <p class="control">
+                        <button id="btnAddSchool" class="button is-primary">
+                          Thêm
+                        </button>
+                      </p>
+                    </div>
+                    <div
+                      id="listSchools"
+                      class="content"
+                      style="max-height: 200px; overflow: auto"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="column is-4">
+                  <div class="box">
+                    <h3 class="title is-6">Xã/Phường</h3>
+                    <div class="field has-addons">
+                      <p class="control is-expanded">
+                        <input
+                          id="inpWard"
+                          class="input"
+                          placeholder="Nhập tên xã/phường"
+                        />
+                      </p>
+                      <p class="control">
+                        <button id="btnAddWard" class="button is-primary">
+                          Thêm
+                        </button>
+                      </p>
+                    </div>
+                    <div
+                      id="listWards"
+                      class="content"
+                      style="max-height: 200px; overflow: auto"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="column is-4">
+                  <div class="box">
+                    <h3 class="title is-6">Thôn/Tổ dân phố</h3>
+                    <div class="field">
+                      <div class="select is-fullwidth">
+                        <select id="selWardForHamlet"></select>
+                      </div>
+                    </div>
+                    <div class="field has-addons" style="margin-top: 6px">
+                      <p class="control is-expanded">
+                        <input
+                          id="inpHamlet"
+                          class="input"
+                          placeholder="Nhập tên thôn/tổ"
+                        />
+                      </p>
+                      <p class="control">
+                        <button id="btnAddHamlet" class="button is-primary">
+                          Thêm
+                        </button>
+                      </p>
+                    </div>
+                    <div
+                      id="listHamlets"
+                      class="content"
+                      style="max-height: 200px; overflow: auto"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <button id="btnSaveMeta" class="button is-link is-fullwidth">
+                  💾 Lưu tất cả danh mục
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Thiết lập mật khẩu -->
+        <div id="tabPasswords" class="tab-content" style="display: none">
+          <div class="card">
+            <div class="card-content">
+              <h2 class="title is-5">Thiết lập mật khẩu thôn/tổ</h2>
+              <p class="subtitle is-6">
+                Tạo ID và mật khẩu cho từng tổ trưởng/trưởng thôn để họ có thể
+                đăng nhập vào hệ thống.
+              </p>
+              <div id="pwList"></div>
+              <div class="field" style="margin-top: 12px">
+                <button
+                  id="btnSaveAllPw"
+                  class="button is-primary is-fullwidth"
+                >
+                  🔐 Lưu tất cả mật khẩu
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="/Sinhhoathe/firebase.config.js"></script>
+
+    <script>
+      // DOM refs (right column)
+      const tblBody = document.getElementById("tblBody");
+      const filterField = document.getElementById("filterField");
+      const filterValue = document.getElementById("filterValue");
+      const countBadge = document.getElementById("countBadge");
+      // DOM refs (left column)
+      const inpSchool = document.getElementById("inpSchool");
+      const btnAddSchool = document.getElementById("btnAddSchool");
+      const listSchools = document.getElementById("listSchools");
+      const inpWard = document.getElementById("inpWard");
+      const btnAddWard = document.getElementById("btnAddWard");
+      const listWards = document.getElementById("listWards");
+      const selWardForHamlet = document.getElementById("selWardForHamlet");
+      const inpHamlet = document.getElementById("inpHamlet");
+      const btnAddHamlet = document.getElementById("btnAddHamlet");
+      const listHamlets = document.getElementById("listHamlets");
+      const btnSaveMeta = document.getElementById("btnSaveMeta");
+      const pwList = document.getElementById("pwList");
+      const btnSaveAllPw = document.getElementById("btnSaveAllPw");
+
+      // State
+      let REG_CACHE = [];
+      const DEFAULT_META = {
+        schools: ["A", "B", "C"],
+        wards: ["xa-1", "xa-2", "phuong-1", "phuong-2"],
+        hamlets: {
+          "xa-1": ["Thôn A", "Thôn B", "Thôn C"],
+          "xa-2": ["Thôn D", "Thôn E"],
+          "phuong-1": ["Tổ 1", "Tổ 2", "Tổ 3"],
+          "phuong-2": ["Tổ 4", "Tổ 5"],
+        },
+      };
+      let META = DEFAULT_META;
+      let PASSWORDS = {};
+
+      // ========== Registrations (right column) ==========
+      function subscribeRegistrations() {
+        if (
+          !(
+            window.firebase &&
+            window.firebase.apps &&
+            window.firebase.apps.length
+          )
+        )
+          return;
+        const ref = firebase.database().ref("registrations");
+        ref.off();
+        ref.on("value", (snap) => {
+          const raw = snap.val();
+          const arr = [];
+          if (raw && typeof raw === "object") {
+            Object.keys(raw).forEach((k) => {
+              const v = raw[k] || {};
+              arr.push({ _key: k, ...v });
+            });
+          }
+          // Sort by school then name
+          arr.sort(
+            (a, b) =>
+              (a.school || "").localeCompare(b.school || "") ||
+              (a.fullName || "").localeCompare(b.fullName || "")
+          );
+          REG_CACHE = arr;
+          renderTable();
+        });
+      }
+
+      function renderTable() {
+        const mode = (filterField && filterField.value) || "school";
+        const q = ((filterValue && filterValue.value) || "")
+          .trim()
+          .toLowerCase();
+        const list = REG_CACHE.slice();
+        tblBody.innerHTML = "";
+        let i = 1;
+        const total = list.length;
+        let shown = 0;
+        if (!total) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 9;
+          td.className = "has-text-centered has-text-grey";
+          td.textContent = "Chưa có dữ liệu.";
+          tr.appendChild(td);
+          tblBody.appendChild(tr);
+          if (countBadge) countBadge.textContent = `0/0`;
+          return;
+        }
+        list.forEach((item) => {
+          if (q) {
+            if (mode === "hamlet") {
+              if ((item.hamlet || "").toLowerCase().indexOf(q) === -1) return;
+            } else {
+              if ((item.school || "").toLowerCase().indexOf(q) === -1) return;
+            }
+          }
+          shown++;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${i++}</td>
+            <td>${item.school || ""}</td>
+            <td>${item.fullName || ""}</td>
+            <td>${item.birthYear || ""}</td>
+            <td>
+              <strong>${item.hamlet || ""}</strong><br>
+              <span class="is-size-7 has-text-grey">${item.ward || ""}</span>
+            </td>
+            <td>${item.parentName || ""}</td>
+            <td>${item.parentPhone || ""}</td>
+            <td>${item.grade || ""}</td>
+            <td>
+              <button class="button is-danger is-small btn-delete" data-key="${
+                item._key
+              }">
+                Xoá
+              </button>
+            </td>
+          `;
+          tblBody.appendChild(tr);
+        });
+
+        // Event listener cho nút xóa
+        tblBody.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const key = e.target.getAttribute("data-key");
+            if (!key) return;
+            const pwd = prompt("Nhập mật khẩu ADMIN để xóa:");
+            if (pwd === "tranhuyhoang") {
+              if (confirm("Chắc chắn xóa?")) {
+                firebase
+                  .database()
+                  .ref("registrations")
+                  .child(key)
+                  .remove()
+                  .then(() => alert("Đã xóa!"))
+                  .catch((err) => alert("Lỗi!"));
+              }
+            } else if (pwd !== null) {
+              alert("Sai mật khẩu");
+            }
+          });
+        });
+
+        if (countBadge) countBadge.textContent = `${shown}/${total}`;
+      }
+
+      document
+        .getElementById("btnReload")
+        .addEventListener("click", renderTable);
+
+      // Filter interactions
+      if (filterField)
+        filterField.addEventListener("change", () => {
+          if (filterField.value === "hamlet")
+            filterValue.placeholder = "Lọc theo thôn/tổ";
+          else filterValue.placeholder = "Lọc theo trường học";
+          renderTable();
+        });
+      if (filterValue) filterValue.addEventListener("input", renderTable);
+
+      // ========== Meta (left column) ==========
+      function subscribeMeta() {
+        if (
+          !(
+            window.firebase &&
+            window.firebase.apps &&
+            window.firebase.apps.length
+          )
+        )
+          return;
+        const ref = firebase.database().ref("meta");
+        ref.off();
+        ref.on("value", (snap) => {
+          META = snap.val() || DEFAULT_META;
+          renderMeta();
+          renderPwList();
+        });
+      }
+      function saveMetaToFirebase() {
+        if (
+          !(
+            window.firebase &&
+            window.firebase.apps &&
+            window.firebase.apps.length
+          )
+        )
+          return Promise.resolve();
+        return firebase.database().ref("meta").set(META);
+      }
+      function renderMeta() {
+        // Schools
+        listSchools.innerHTML = "";
+        (META.schools || []).forEach((s, idx) => {
+          const p = document.createElement("p");
+          p.innerHTML = `${s} <button class="button is-small is-light" data-del-school="${idx}">Xóa</button>`;
+          listSchools.appendChild(p);
+        });
+        // Wards
+        listWards.innerHTML = "";
+        const prevSel = selWardForHamlet.value;
+        selWardForHamlet.innerHTML = "";
+        (META.wards || []).forEach((w, idx) => {
+          const p = document.createElement("p");
+          p.innerHTML = `${w} <button class="button is-small is-light" data-del-ward="${idx}">Xóa</button>`;
+          listWards.appendChild(p);
+          const opt = document.createElement("option");
+          opt.value = w;
+          opt.textContent = w;
+          selWardForHamlet.appendChild(opt);
+        });
+        if ((META.wards || []).includes(prevSel))
+          selWardForHamlet.value = prevSel;
+        else if ((META.wards || []).length)
+          selWardForHamlet.value = META.wards[0];
+        // Hamlets of selected ward
+        listHamlets.innerHTML = "";
+        const wsel = selWardForHamlet.value;
+        (META.hamlets && META.hamlets[wsel] ? META.hamlets[wsel] : []).forEach(
+          (h, i) => {
+            const p = document.createElement("p");
+            p.innerHTML = `${h} <button class="button is-small is-light" data-del-hamlet="${i}">Xóa</button>`;
+            listHamlets.appendChild(p);
+          }
+        );
+      }
+      btnAddSchool.addEventListener("click", () => {
+        const v = (inpSchool.value || "").trim();
+        if (!v) return;
+        META.schools = META.schools || [];
+        if (
+          !META.schools.some(
+            (s) => (s || "").trim().toLowerCase() === v.toLowerCase()
+          )
+        )
+          META.schools.push(v);
+        inpSchool.value = "";
+        renderMeta();
+      });
+      btnAddWard.addEventListener("click", () => {
+        const v = (inpWard.value || "").trim();
+        if (!v) return;
+        META.wards = META.wards || [];
+        if (
+          !META.wards.some(
+            (w) => (w || "").trim().toLowerCase() === v.toLowerCase()
+          )
+        )
+          META.wards.push(v);
+        META.hamlets = META.hamlets || {};
+        META.hamlets[v] = META.hamlets[v] || [];
+        inpWard.value = "";
+        renderMeta();
+        selWardForHamlet.value = v;
+        renderMeta();
+      });
+      selWardForHamlet.addEventListener("change", renderMeta);
+      btnAddHamlet.addEventListener("click", () => {
+        const w = selWardForHamlet.value;
+        const v = (inpHamlet.value || "").trim();
+        if (!w || !v) return;
+        META.hamlets = META.hamlets || {};
+        META.hamlets[w] = META.hamlets[w] || [];
+        if (
+          !META.hamlets[w].some(
+            (h) => (h || "").trim().toLowerCase() === v.toLowerCase()
+          )
+        )
+          META.hamlets[w].push(v);
+        inpHamlet.value = "";
+        renderMeta();
+      });
+      listSchools.addEventListener("click", (e) => {
+        const idx = e.target.getAttribute("data-del-school");
+        if (idx === null) return;
+        META.schools.splice(parseInt(idx, 10), 1);
+        saveMetaToFirebase();
+      });
+      listWards.addEventListener("click", (e) => {
+        const idx = e.target.getAttribute("data-del-ward");
+        if (idx === null) return;
+        const w = META.wards.splice(parseInt(idx, 10), 1)[0];
+        if (META.hamlets) delete META.hamlets[w];
+        saveMetaToFirebase();
+        renderMeta();
+        renderPwList();
+      });
+      listHamlets.addEventListener("click", (e) => {
+        const idx = e.target.getAttribute("data-del-hamlet");
+        if (idx === null) return;
+        const w = selWardForHamlet.value;
+        META.hamlets[w].splice(parseInt(idx, 10), 1);
+        saveMetaToFirebase();
+        renderMeta();
+        renderPwList();
+      });
+      btnSaveMeta.addEventListener("click", () => {
+        saveMetaToFirebase().then(() => alert("Đã lưu danh mục."));
+      });
+
+      // ========== Passwords ==========
+      function subscribePasswords() {
+        if (
+          !(
+            window.firebase &&
+            window.firebase.apps &&
+            window.firebase.apps.length
+          )
+        )
+          return;
+        const ref = firebase.database().ref("passwords");
+        ref.off();
+        ref.on("value", (snap) => {
+          PASSWORDS = snap.val() || {};
+          renderPwList();
+        });
+      }
+      function savePasswordsToFirebase(map) {
+        if (
+          !(
+            window.firebase &&
+            window.firebase.apps &&
+            window.firebase.apps.length
+          )
+        )
+          return Promise.resolve();
+        return firebase.database().ref("passwords").set(map);
+      }
+      function renderPwList() {
+        pwList.innerHTML = "";
+        (META.wards || []).forEach((ward) => {
+          const details = document.createElement("details");
+          details.className = "box";
+          details.style.marginBottom = "1rem";
+
+          const summary = document.createElement("summary");
+          summary.className = "title is-6 has-text-link";
+          summary.style.cursor = "pointer";
+          summary.style.outline = "none";
+          summary.textContent = `📂 ${ward.toUpperCase()} (Nhấn để hiện danh sách)`;
+          details.appendChild(summary);
+
+          const contentDiv = document.createElement("div");
+          contentDiv.style.marginTop = "1rem";
+
+          (META.hamlets && META.hamlets[ward]
+            ? META.hamlets[ward]
+            : []
+          ).forEach((h) => {
+            // Composite key để tránh trùng lặp tên tổ giữa các xã/phường
+            const compositeKey = ward + "__" + h;
+
+            const field = document.createElement("div");
+            field.className = "field is-horizontal";
+            // Lấy object password từ key mới (nếu có), hoặc key cũ (h) để tương thích ngược tạm thời (migrate)
+            const obj = PASSWORDS[compositeKey] || PASSWORDS[h] || {};
+
+            field.innerHTML = `
+              <div class="field-label is-normal" style="flex-grow: 2; text-align: left; min-width: 150px;">
+                <label class="label">${h}</label>
+              </div>
+              <div class="field-body">
+                <div class="field has-addons">
+                  <p class="control is-expanded">
+                    <input class="input" type="text" 
+                      data-comp-key="${compositeKey}" 
+                      data-ward="${ward}"
+                      data-hamlet="${h}"
+                      data-type="id"
+                      placeholder="ID Đăng nhập" value="${obj.id || ""}">
+                  </p>
+                  <p class="control is-expanded">
+                    <input class="input" type="text" 
+                      data-comp-key="${compositeKey}" 
+                      data-type="pass"
+                      placeholder="Mật khẩu" value="${
+                        obj.password || obj || ""
+                      }">
+                  </p>
+                </div>
+              </div>`;
+            contentDiv.appendChild(field);
+          });
+          details.appendChild(contentDiv);
+          pwList.appendChild(details);
+        });
+      }
+
+      btnSaveAllPw.addEventListener("click", () => {
+        // Clone state hiện tại
+        const map = JSON.parse(JSON.stringify(PASSWORDS || {}));
+
+        // Quét tất cả input đang render để cập nhật vào map
+        // Lưu ý: Chỉ cập nhật những cái đang hiển thị (hoặc đã load).
+        // Nhưng do renderPwList render dựa trên META, nên ta sẽ duyệt lại META để chắc chắn key đúng.
+        // Cách tốt hơn là duyệt DOM input để lấy giá trị user vừa nhập.
+
+        const inputs = pwList.querySelectorAll("input[data-comp-key]");
+        inputs.forEach((inp) => {
+          const key = inp.getAttribute("data-comp-key");
+          const type = inp.getAttribute("data-type");
+          const ward = inp.getAttribute("data-ward"); // Chỉ có ở input ID
+          const hamlet = inp.getAttribute("data-hamlet"); // Chỉ có ở input ID
+
+          if (!map[key]) map[key] = {};
+
+          // Nếu đây là input ID, ta có thể tranh thủ lưu tên Ward/Hamlet vào object để dễ dùng bên client
+          if (ward && hamlet) {
+            map[key].wardName = ward;
+            map[key].hamletName = hamlet;
+          }
+
+          if (type === "id") map[key].id = (inp.value || "").trim();
+          if (type === "pass") map[key].password = (inp.value || "").trim();
+        });
+
+        savePasswordsToFirebase(map)
+          .then(() => {
+            alert("Đã lưu tất cả mật khẩu! (Đã xử lý trùng tên tổ)");
+          })
+          .catch(() => alert("Không thể lưu mật khẩu."));
+      });
+
+      // ===== Admin gate logic =====
+      function bootAdmin() {
+        subscribeRegistrations();
+        subscribeMeta();
+        subscribePasswords();
+        renderTable();
+      }
+
+      // ===== Tab switching logic =====
+      function initTabs() {
+        const tabButtons = document.querySelectorAll(".tabs li");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        tabButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const tabName = btn.getAttribute("data-tab");
+
+            // Remove active class from all tabs
+            tabButtons.forEach((b) => b.classList.remove("is-active"));
+            // Add active class to clicked tab
+            btn.classList.add("is-active");
+
+            // Hide all tab contents
+            tabContents.forEach((content) => {
+              content.style.display = "none";
+            });
+
+            // Show selected tab content
+            const selectedTab = document.getElementById(
+              "tab" + tabName.charAt(0).toUpperCase() + tabName.slice(1)
+            );
+            if (selectedTab) selectedTab.style.display = "";
+          });
+        });
+      }
+
+      // ===== Logout admin =====
+      const btnLogoutAdmin = document.getElementById("btnLogoutAdmin");
+      if (btnLogoutAdmin) {
+        btnLogoutAdmin.addEventListener("click", () => {
+          sessionStorage.removeItem("dp-admin-auth");
+          location.reload();
+        });
+      }
+
+      (function initGate() {
+        const gate = document.getElementById("adminGate");
+        const app = document.getElementById("adminApp");
+        const ok = sessionStorage.getItem("dp-admin-auth") === "ok";
+        if (ok) {
+          gate.style.display = "none";
+          app.style.display = "";
+          bootAdmin();
+          initTabs();
+          return;
+        }
+        gate.style.display = "";
+        app.style.display = "none";
+        const btn = document.getElementById("btnGateLogin");
+        const id = document.getElementById("gateId");
+        const pw = document.getElementById("gatePass");
+        const err = document.getElementById("gateErr");
+        btn.addEventListener("click", () => {
+          const vid = (id.value || "").trim();
+          const vpw = (pw.value || "").trim();
+          if (vid === "ADMIN" && vpw === "tranhuyhoang") {
+            sessionStorage.setItem("dp-admin-auth", "ok");
+            gate.style.display = "none";
+            app.style.display = "";
+            bootAdmin();
+            initTabs();
+          } else {
+            err.style.display = "";
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
