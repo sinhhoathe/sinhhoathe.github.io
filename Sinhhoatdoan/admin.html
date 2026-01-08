@@ -163,6 +163,35 @@
                             <textarea class="textarea" id="evtDesc" placeholder="Nhập nội dung, địa chỉ hoặc lưu ý cho buổi sinh hoạt..." rows="2"></textarea>
                         </div>
                     </div>
+                    <!-- Thời gian row -->
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Thời gian bắt đầu</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="datetime-local" id="evtStartTime" required>
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </span>
+                                </div>
+                                <p class="help">Đoàn viên chỉ có thể điểm danh sau mốc này.</p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Thời gian kết thúc (Tùy chọn)</label>
+                                <div class="control has-icons-left">
+                                    <input class="input" type="datetime-local" id="evtEndTime">
+                                    <span class="icon is-small is-left">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                </div>
+                                <p class="help">Nếu trống, bạn phải đóng thủ công.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vị trí row -->
                     <div class="columns">
                         <div class="column is-4">
                             <div class="field">
@@ -371,20 +400,52 @@
                 sortedEvents.forEach(([key, evt]) => {
                     const card = document.createElement('div');
                     card.className = 'animate-fade-in';
-                    // Show current status correctly
-                    const statusClass = evt.isOpen ? 'is-success' : 'is-danger';
-                    const statusText = evt.isOpen ? 'Đang mở' : 'Đã đóng';
+                    
+                    // Logic check status
+                    const now = Date.now();
+                    let isExpired = false;
+                    let isFuture = false;
+                    
+                    if (evt.endTime && now > evt.endTime) {
+                        isExpired = true;
+                    }
+                    if (evt.startTime && now < evt.startTime) {
+                        isFuture = true;
+                    }
+
+                    let statusClass = 'is-danger';
+                    let statusText = 'Đã đóng';
+                    
+                    if (evt.isOpen) {
+                        if (isExpired) {
+                            statusText = 'Hết hạn';
+                        } else if (isFuture) {
+                            statusClass = 'is-warning';
+                            statusText = 'Chờ bắt đầu';
+                        } else {
+                            statusClass = 'is-success';
+                            statusText = 'Đang mở';
+                        }
+                    }
                     
                     card.innerHTML = `
-                        <div class="card h-100">
-                            <header class="card-header has-background-light">
-                                <p class="card-header-title">${evt.name}</p>
-                            </header>
-                            <div class="card-content">
-                                <div class="tags are-medium">
-                                    <span class="tag ${statusClass}">${statusText}</span>
-                                    <span class="tag is-info is-light">${new Date(evt.startTime).toLocaleDateString('vi-VN')}</span>
-                                </div>
+                         <div class="card h-100">
+                             <header class="card-header has-background-light">
+                                 <p class="card-header-title">${evt.name}</p>
+                             </header>
+                             <div class="card-content">
+                                 <div class="tags are-medium mb-2">
+                                     <span class="tag ${statusClass}">${statusText}</span>
+                                     <span class="tag is-info is-light"><i class="fas fa-calendar-alt mr-1"></i> ${new Date(evt.startTime).toLocaleDateString('vi-VN')}</span>
+                                 </div>
+                                 <div class="is-size-7 mb-1">
+                                    <i class="fas fa-play-circle has-text-success mr-1"></i> Bắt đầu: ${new Date(evt.startTime).toLocaleString('vi-VN')}
+                                 </div>
+                                 ${evt.endTime ? `
+                                    <div class="is-size-7 mb-2">
+                                        <i class="fas fa-stop-circle has-text-danger mr-1"></i> Kết thúc: ${new Date(evt.endTime).toLocaleString('vi-VN')}
+                                    </div>
+                                 ` : ''}
                                 <div class="content is-size-7 mt-3">
                                     <div class="mb-2">
                                         <strong>Mô tả:</strong> 
@@ -423,6 +484,13 @@
             editingEventKey = null;
             document.getElementById('modalTitle').textContent = "Tạo buổi sinh hoạt mới";
             document.getElementById('createEventForm').reset();
+            
+            // Set default start time to now
+            const now = new Date();
+            const tzOffset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
+            document.getElementById('evtStartTime').value = localISOTime;
+
             document.getElementById('eventModal').classList.add('is-active');
             document.getElementById('gpsMsg').classList.add('is-hidden');
             CURRENT_GPS = null;
@@ -434,6 +502,23 @@
             document.getElementById('evtName').value = evt.name;
             document.getElementById('evtDesc').value = evt.description || "";
             document.getElementById('evtRadius').value = evt.radius;
+
+            if (evt.startTime) {
+                const d = new Date(evt.startTime);
+                const tzOffset = d.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
+                document.getElementById('evtStartTime').value = localISOTime;
+            }
+
+            if (evt.endTime) {
+                // Formatting for datetime-local: YYYY-MM-DDTHH:mm
+                const d = new Date(evt.endTime);
+                const tzOffset = d.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
+                document.getElementById('evtEndTime').value = localISOTime;
+            } else {
+                document.getElementById('evtEndTime').value = "";
+            }
             // Fill Coordinates
             if (evt.location) {
                 CURRENT_GPS = evt.location;
@@ -498,22 +583,23 @@
             const name = document.getElementById('evtName').value;
             const description = document.getElementById('evtDesc').value;
             const radius = document.getElementById('evtRadius').value;
-            // Read from hidden/visible inputs in case user edited them manually (if we added visible inputs)
-            // But here we rely on hidden inputs updated by getAdminGPS or set by logic.
-            // Requirement: "cho phép admin chỉnh sửa vị trí nữa nhé, xem tọa độ chi tiết".
-            // So we really should have visible inputs for manual edit if needed.
+            const startTimeVal = document.getElementById('evtStartTime').value;
+            const endTimeVal = document.getElementById('evtEndTime').value;
             
             const latInput = parseFloat(document.getElementById('evtLat').value);
             const lngInput = parseFloat(document.getElementById('evtLng').value);
 
             if (!name) return alert("Vui lòng nhập tên");
+            if (!startTimeVal) return alert("Vui lòng chọn thời gian bắt đầu");
             if (!latInput || !lngInput) return alert("Vui lòng lấy tọa độ hoặc nhập tọa độ!");
 
             const eventData = {
                 name,
                 description,
                 radius: parseInt(radius),
-                location: { lat: latInput, lng: lngInput }
+                location: { lat: latInput, lng: lngInput },
+                startTime: new Date(startTimeVal).getTime(),
+                endTime: endTimeVal ? new Date(endTimeVal).getTime() : null
             };
 
             if (editingEventKey) {
@@ -523,8 +609,7 @@
                 // Create
                 db.ref('sinhhoatdoan/events').push({
                     ...eventData,
-                    isOpen: true,
-                    startTime: firebase.database.ServerValue.TIMESTAMP
+                    isOpen: true
                 });
             }
 

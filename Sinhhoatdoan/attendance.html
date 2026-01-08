@@ -404,8 +404,10 @@
         function renderList() {
             eventList.innerHTML = '';
             
-            const openEvents = events.filter(e => e.isOpen);
-            const closedEvents = events.filter(e => !e.isOpen);
+            const now = Date.now();
+            const openEvents = events.filter(e => e.isOpen && (!e.endTime || now < e.endTime) && (e.startTime && now >= e.startTime));
+            const upcomingEvents = events.filter(e => e.isOpen && (e.startTime && now < e.startTime));
+            const closedEvents = events.filter(e => !e.isOpen || (e.endTime && now >= e.endTime));
 
             // 1. Render Open Events
             if (openEvents.length > 0) {
@@ -437,6 +439,9 @@
                                     </div>
                                 </div>
                                 <div class="meta-item"><i class="far fa-calendar-check"></i> <b>Ngày:</b> ${dateStr}</div>
+                                ${item.endTime ? `
+                                    <div class="meta-item has-text-danger"><i class="fas fa-clock"></i> <b>Kết thúc:</b> ${new Date(item.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} ngày ${new Date(item.endTime).toLocaleDateString('vi-VN')}</div>
+                                ` : ''}
                                 <div class="meta-item"><i class="fas fa-location-arrow"></i> <b>Bán kính:</b> ${item.radius}m</div>
                                 <div class="meta-item">
                                     <a href="https://www.google.com/maps?q=${item.location.lat},${item.location.lng}" target="_blank" class="has-text-link is-size-7">
@@ -448,6 +453,45 @@
                                 <span>Bắt đầu Điểm danh</span>
                                 <i class="fas fa-chevron-right"></i>
                             </button>
+                        </div>
+                    `;
+                    eventList.appendChild(card);
+                });
+            }
+
+            // 1.5 Render Upcoming Events
+            if (upcomingEvents.length > 0) {
+                const title = document.createElement('div');
+                title.className = 'section-title animate-up mt-5';
+                title.innerHTML = '📅 Sắp diễn ra';
+                eventList.appendChild(title);
+
+                upcomingEvents.forEach(item => {
+                    const dateStr = new Date(item.startTime).toLocaleDateString('vi-VN');
+                    const timeStr = new Date(item.startTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                    const card = document.createElement('div');
+                    card.className = 'event-item is-closed animate-up'; 
+                    card.style.opacity = "0.9";
+                    
+                    card.innerHTML = `
+                        <div class="event-content">
+                            <div class="event-status-pill pill-closed" style="background: rgba(255, 171, 0, 0.1); color: #ffab00;">
+                                <i class="fas fa-clock"></i> Chờ bắt đầu
+                            </div>
+                            <div class="event-title">${item.name}</div>
+                            <div class="event-meta-list">
+                                <div class="meta-item"><i class="fas fa-play"></i> <b>Bắt đầu lúc:</b> ${timeStr} - ${dateStr}</div>
+                                <div class="meta-item" style="flex-direction: column; align-items: flex-start;">
+                                    <div><i class="fas fa-info-circle"></i> <b class="mr-1">Lưu ý:</b></div>
+                                    <div class="mt-1" style="width: 100%;">
+                                        <div class="desc-content preserve-newline" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem;">${item.description || 'Không có mô tả'}</div>
+                                        ${item.description && item.description.length > 60 ? `
+                                            <a href="javascript:void(0)" class="has-text-link is-size-7 mt-1" onclick="event.stopPropagation(); const s = this.previousElementSibling.style; if(s.display === '-webkit-box') { s.display = 'block'; this.innerText = 'Thu gọn'; } else { s.display = '-webkit-box'; this.innerText = 'Xem thêm'; }">Xem thêm</a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="closed-notice">Nút điểm danh sẽ tự động xuất hiện khi đến giờ sinh hoạt</div>
                         </div>
                     `;
                     eventList.appendChild(card);
@@ -484,7 +528,12 @@
                                 </div>
                                 <div class="meta-item"><i class="far fa-calendar"></i> ${dateStr}</div>
                             </div>
-                            <div class="closed-notice">Buổi sinh hoạt này đã dừng tiếp nhận điểm danh</div>
+                            <div class="closed-notice">
+                                ${ (item.endTime && now >= item.endTime) ? 
+                                    `Hệ thống đã tự động đóng lúc ${new Date(item.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}` : 
+                                    'Buổi sinh hoạt này đã dừng tiếp nhận điểm danh' 
+                                }
+                            </div>
                         </div>
                     `;
                     eventList.appendChild(card);
@@ -590,13 +639,22 @@
             
             document.getElementById('modalName').textContent = selectedEvent.name;
             document.getElementById('modalTime').innerHTML = `
-                <p>${new Date(selectedEvent.startTime).toLocaleString('vi-VN')}</p>
-                <div class="mt-2">
+                <div class="tags is-centered mb-2">
+                    <span class="tag is-info is-light">
+                        <i class="fas fa-play mr-1"></i> Bắt đầu: ${new Date(selectedEvent.startTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    ${selectedEvent.endTime ? `
+                    <span class="tag is-danger is-light">
+                        <i class="fas fa-stop mr-1"></i> Kết thúc: ${new Date(selectedEvent.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    ` : ''}
+                </div>
+                <div class="mb-3">
                     <a href="${mapUrl}" target="_blank" class="button is-small is-link is-light is-rounded">
                         <i class="fas fa-directions mr-1"></i> Xem trên bản đồ
                     </a>
                 </div>
-                <p class="mt-2 has-text-grey-darker preserve-newline"><i>${selectedEvent.description || ''}</i></p>
+                <p class="has-text-grey-darker preserve-newline is-size-7"><i>${selectedEvent.description || ''}</i></p>
             `;
             
             checkInModal.classList.add('is-active');
