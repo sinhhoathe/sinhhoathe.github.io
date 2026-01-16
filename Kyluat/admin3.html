@@ -128,9 +128,23 @@
     <script src="firebase.config.js"></script>
     <script>
         // Check Auth
-        if (sessionStorage.getItem('kyluat_role') !== 'admin3') {
+        const currentRole = sessionStorage.getItem('kyluat_role');
+        if (currentRole !== 'admin3' && currentRole !== 'admin0') {
             window.location.href = 'index.html';
         }
+
+        // System Control Check
+        rootRef.child('Settings/Config').on('value', snap => {
+            const config = snap.val() || { status: 'active' };
+            const today = new Date().toISOString().split('T')[0];
+            const isExpired = config.expiryDate && today > config.expiryDate;
+            const isLocked = config.status === 'locked';
+
+            if ((isExpired || isLocked) && currentRole !== 'admin0') {
+                alert(config.message || "Hệ thống đã bị khóa hoặc hết hạn!");
+                window.location.href = 'index.html';
+            }
+        });
 
         // Photo Modal functions
         function showImg(src) {

@@ -471,7 +471,7 @@
                     <input type="text" id="searchRankStudent" placeholder="Tìm tên/lớp..." style="width: 250px; padding: 10px; border-radius: 12px; background: #1e293b; border: 1px solid var(--glass-border); color: white;" oninput="renderStudentLeaderboard()">
                 </div>
             </div>
-            <div class="leaderboard-grid" id="studentLeaderboardGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+            <div class="leaderboard-list" id="studentLeaderboardGrid" style="display: flex; flex-direction: column; gap: 10px;">
                 <!-- Content will be rendered here -->
             </div>
             <div class="pagination" id="studentRankPagination"></div>
@@ -480,7 +480,7 @@
         <!-- Section 3: Class Leaderboard -->
         <div class="card">
             <h2 style="font-size: 1.5rem; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;">📊 Thi Đua Giữa Các Khối Lớp</h2>
-            <div class="leaderboard-grid" id="classLeaderboardGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+            <div class="leaderboard-list" id="classLeaderboardGrid" style="display: flex; flex-direction: column; gap: 10px;">
                 <!-- Content will be rendered here -->
             </div>
         </div>
@@ -506,9 +506,9 @@
         const studentRankGrid = document.getElementById('studentLeaderboardGrid');
         const classRankGrid = document.getElementById('classLeaderboardGrid');
 
-        // Admin 1 credentials
-        const ADMIN_1_ID = "ADMIN";
-        const ADMIN_1_PASS = "tranhuyhoang";
+        // Admin 0 (Super Admin) - Cố định để quản trị gốc
+        const ADMIN_0_ID = "ADMIN";
+        const ADMIN_0_PASS = "tranhuyhoang";
 
         let allViolations = [];
         let filteredViolations = [];
@@ -517,26 +517,77 @@
         let studentRankPage = 1;
         const pageSize = 20;
 
+        let systemConfig = { status: 'active', expiryDate: '', message: '' };
+        let admin1List = {};
+
+        // Check system status first
+        function checkSystemStatus() {
+            rootRef.child('Settings').on('value', snap => {
+                const data = snap.val() || {};
+                systemConfig = data.Config || systemConfig;
+                admin1List = data.Admin1List || {};
+
+                const today = new Date().toISOString().split('T')[0];
+                const isExpired = systemConfig.expiryDate && today > systemConfig.expiryDate;
+                const isLocked = systemConfig.status === 'locked';
+
+                if (isExpired || isLocked) {
+                    // Nếu là admin0 đang login trong session thì vẫn cho xem
+                    if (sessionStorage.getItem('kyluat_role') !== 'admin0') {
+                        const msg = systemConfig.message || (isExpired ? "Hệ thống đã hết thời hạn sử dụng!" : "Hệ thống hiện đang bị khóa!");
+                        document.body.innerHTML = `
+                            <div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#0f172a; color:white; font-family:'Outfit', sans-serif; text-align:center; padding:20px;">
+                                <h1 style="color:#ef4444; font-size:4rem; margin-bottom:20px;">🛑</h1>
+                                <h2 style="margin-bottom:10px;">THÔNG BÁO TỪ QUẢN TRỊ VIÊN</h2>
+                                <p style="color:#94a3b8; font-size:1.1rem; max-width:500px;">${msg}</p>
+                                <button onclick="location.reload()" style="margin-top:30px; padding:12px 24px; border-radius:12px; border:none; background:#6366f1; color:white; cursor:pointer;">Thử lại</button>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+        checkSystemStatus();
+
         async function handleLogin() {
-            const id = document.getElementById('loginId').value.trim();
+            const idInput = document.getElementById('loginId').value.trim();
+            const id = idInput.toUpperCase();
             const pass = document.getElementById('loginPass').value.trim();
 
             if (!id || !pass) return;
 
-            if (id === ADMIN_1_ID && pass === ADMIN_1_PASS) {
+            // 1. Check Admin 0 (Highest priority, works even if locked)
+            if (id === ADMIN_0_ID && pass === ADMIN_0_PASS) {
+                sessionStorage.setItem('kyluat_role', 'admin0');
+                sessionStorage.setItem('kyluat_id', id);
+                window.location.href = 'admin0.html';
+                return;
+            }
+
+            // Check if system is restricted for others
+            const today = new Date().toISOString().split('T')[0];
+            const isRestricted = (systemConfig.expiryDate && today > systemConfig.expiryDate) || systemConfig.status === 'locked';
+            if (isRestricted) {
+                alert(systemConfig.message || "Hệ thống đang bị tạm khóa hoặc hết hạn. Vui lòng liên hệ Admin 0.");
+                return;
+            }
+
+            // 2. Check Admin 1 List (Fetched from Firebase Settings/Admin1List)
+            if (admin1List && admin1List[id] && admin1List[id].pass === pass) {
                 sessionStorage.setItem('kyluat_role', 'admin1');
                 sessionStorage.setItem('kyluat_id', id);
                 window.location.href = 'admin1.html';
                 return;
             }
 
+            // 3. Check other Admins (Admins node - for Admin 2, 3, 4)
             const snapshot = await rootRef.child('Admins').child(id).once('value');
-            const adminData = snapshot.val();
+            const data = snapshot.val();
 
-            if (adminData && adminData.pass === pass) {
-                sessionStorage.setItem('kyluat_role', adminData.role);
+            if (data && data.pass === pass) {
+                sessionStorage.setItem('kyluat_role', data.role);
                 sessionStorage.setItem('kyluat_id', id);
-                window.location.href = `admin${adminData.role.replace('admin', '')}.html`;
+                window.location.href = `admin${data.role.replace('admin', '')}.html`;
             } else {
                 alert('ID hoặc mật khẩu không đúng!');
             }
@@ -675,18 +726,20 @@
             pagedList.forEach((s, idx) => {
                 const rank = start + idx + 1;
                 const card = document.createElement('div');
-                // Only highlight top 3 if sorting DESC
                 const highlight = (sortOrder === 'desc' && rank <= 3) ? 'top-' + rank : '';
                 card.className = `rank-card ${highlight}`;
+                // Set fixed height or layout if needed for list style
+                card.style = "width: 100%; justify-content: space-between;"; 
                 card.innerHTML = `
-                    <div class="rank-number">${rank}</div>
-                    <img src="${s.photo}" style="width:35px; height:35px; border-radius:8px; object-fit:cover;">
-                    <div style="flex:1; min-width:0;">
-                        <div style="font-weight:600; font-size:0.8rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.name}</div>
-                        <div style="font-size:0.7rem; color:#94a3b8;">MSHS: ${s.id}</div>
-                        <div style="font-size:0.7rem; color:#94a3b8;">Lớp ${s.class || 'N/A'}</div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                        <div class="rank-number">${rank}</div>
+                        <img src="${s.photo}" style="width:40px; height:40px; border-radius:10px; object-fit:cover;">
+                        <div style="min-width:0;">
+                            <div style="font-weight:700; font-size:1rem;">${s.name}</div>
+                            <div style="font-size:0.8rem; color:#94a3b8;">MSHS: ${s.id} | Lớp ${s.class || 'N/A'}</div>
+                        </div>
                     </div>
-                    <div style="font-weight:700; color:#f59e0b; font-size:0.85rem;">${s.stars || 0} ⭐</div>
+                    <div style="font-weight:800; color:#f59e0b; font-size:1.1rem; min-width: 60px; text-align: right;">${s.stars || 0} ⭐</div>
                 `;
                 studentRankGrid.appendChild(card);
             });

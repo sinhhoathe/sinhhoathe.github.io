@@ -172,7 +172,15 @@
                     </div>
                 </form>
                 <div style="max-height: 120px; overflow-y: auto; margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 10px;">
-                    <table style="margin-top: 0;">
+                    <table style="margin-top: 0; width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; font-size: 0.7rem; color: #94a3b8; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 5px;">ID</th>
+                                <th style="padding: 5px;">Mật khẩu</th>
+                                <th style="padding: 5px;">Chức năng</th>
+                                <th style="padding: 5px; text-align: right;">Xóa</th>
+                            </tr>
+                        </thead>
                         <tbody id="adminTableBody"></tbody>
                     </table>
                 </div>
@@ -205,10 +213,8 @@
                     <table style="margin-top: 0;">
                         <tbody id="violationManageBody"></tbody>
                     </table>
-                    <div id="moreViolations" style="text-align: center; padding: 20px; display: none;">
-                        <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #94a3b8; width: auto; font-size: 0.8rem;" onclick="loadMoreViolations()">Tải thêm...</button>
-                    </div>
                 </div>
+                <div class="pagination" id="violationPagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;"></div>
             </div>
 
             <!-- Student Management -->
@@ -232,6 +238,7 @@
                         <tbody id="studentManageBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination" id="studentPagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;"></div>
             </div>
         </div>
     </div>
@@ -281,9 +288,23 @@
     <script src="firebase.config.js"></script>
     <script>
         // Check Auth
-        if (sessionStorage.getItem('kyluat_role') !== 'admin1') {
+        const currentRole = sessionStorage.getItem('kyluat_role');
+        if (currentRole !== 'admin1' && currentRole !== 'admin0') {
             window.location.href = 'index.html';
         }
+
+        // System Control Check
+        rootRef.child('Settings/Config').on('value', snap => {
+            const config = snap.val() || { status: 'active' };
+            const today = new Date().toISOString().split('T')[0];
+            const isExpired = config.expiryDate && today > config.expiryDate;
+            const isLocked = config.status === 'locked';
+
+            if ((isExpired || isLocked) && currentRole !== 'admin0') {
+                alert(config.message || "Hệ thống đã bị khóa hoặc hết hạn!");
+                window.location.href = 'index.html';
+            }
+        });
 
         const createForm = document.getElementById('createAdminForm');
         const adminTableBody = document.getElementById('adminTableBody');
@@ -297,7 +318,9 @@
         let allStudents = [];
         let allViolations = [];
         let allClasses = [];
-        let violationLimit = 20;
+        let studentPage = 1;
+        let violationPage = 1;
+        const pageSize = 20;
 
         // Account logic
         createForm.addEventListener('submit', async (e) => {
@@ -313,8 +336,23 @@
         rootRef.child('Admins').on('value', snap => {
             adminTableBody.innerHTML = '';
             snap.forEach(child => {
+                const data = child.val();
+                let roleText = '';
+                if (data.role === 'admin2') roleText = 'Nhập liệu';
+                else if (data.role === 'admin3') roleText = 'Ghi lỗi';
+                else if (data.role === 'admin4') roleText = 'Tặng sao';
+                else roleText = data.role;
+
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${child.key}</td><td>${child.val().role.replace('admin','Ad')}</td><td style="text-align:right"><button class="btn-danger" onclick="deleteAdmin('${child.key}')">Xóa</button></td>`;
+                row.style.fontSize = '0.8rem';
+                row.innerHTML = `
+                    <td style="padding: 5px; font-weight: 600;">${child.key}</td>
+                    <td style="padding: 5px; color: #94a3b8;">${data.pass}</td>
+                    <td style="padding: 5px;"><span style="color: #818cf8; font-weight: 600;">${roleText}</span></td>
+                    <td style="padding: 5px; text-align:right">
+                        <button class="btn-danger" style="font-size: 0.65rem; padding: 4px 8px;" onclick="deleteAdmin('${child.key}')">Xóa</button>
+                    </td>
+                `;
                 adminTableBody.appendChild(row);
             });
         });
@@ -362,14 +400,18 @@
             renderStudents();
         });
 
-        function filterStudents() { renderStudents(); }
+        function filterStudents() { studentPage = 1; renderStudents(); }
 
         function renderStudents() {
             const query = document.getElementById('searchStudent').value.toLowerCase();
             studentManageBody.innerHTML = '';
             const filtered = allStudents.filter(s => s.name.toLowerCase().includes(query) || (s.class && s.class.toLowerCase().includes(query)));
 
-            filtered.forEach(s => {
+            const start = (studentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const displayList = filtered.slice(start, end);
+
+            displayList.forEach(s => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
@@ -391,6 +433,7 @@
                 `;
                 studentManageBody.appendChild(row);
             });
+            renderPagination('studentPagination', filtered.length, studentPage, (p) => { studentPage = p; renderStudents(); });
         }
 
         async function deleteStudent(id, name) {
@@ -421,14 +464,16 @@
             renderViolations();
         });
 
-        function filterViolations() { violationLimit = 20; renderViolations(); }
-        function loadMoreViolations() { violationLimit += 20; renderViolations(); }
+        function filterViolations() { violationPage = 1; renderViolations(); }
 
         function renderViolations() {
             const query = document.getElementById('searchViolation').value.toLowerCase();
             violationManageBody.innerHTML = '';
             const filtered = allViolations.filter(v => v.studentName.toLowerCase().includes(query));
-            const displayList = filtered.slice(0, violationLimit);
+            
+            const start = (violationPage - 1) * pageSize;
+            const end = start + pageSize;
+            const displayList = filtered.slice(start, end);
 
             displayList.forEach(item => {
                 const row = document.createElement('tr');
@@ -444,6 +489,7 @@
                     <td id="cell-${item.id}">
                         <div style="display:flex; align-items:center;">
                             <span class="violation-tag" style="${isMerit ? 'background:rgba(16,185,129,0.1); color:#10b981;' : ''}">${displayText}</span>
+                            ${isLong ? `<span class="btn-more" onclick="showDetail('${item.violationType.replace(/'/g, "\\'")}')">...</span>` : ''}
                         </div>
                     </td>
                     <td style="text-align:right">
@@ -454,7 +500,26 @@
                 `;
                 violationManageBody.appendChild(row);
             });
-            document.getElementById('moreViolations').style.display = filtered.length > violationLimit ? 'block' : 'none';
+            renderPagination('violationPagination', filtered.length, violationPage, (p) => { violationPage = p; renderViolations(); });
+        }
+
+        function renderPagination(elId, totalCount, current, onPageChange) {
+            const el = document.getElementById(elId);
+            el.innerHTML = '';
+            const totalPages = Math.ceil(totalCount / pageSize);
+            if (totalPages <= 1) return;
+
+            let start = Math.max(1, current - 2);
+            let end = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(1, end - 4);
+
+            for (let i = start; i <= end; i++) {
+                const btn = document.createElement('button');
+                btn.style = `padding: 5px 10px; background: ${i === current ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; border: 1px solid var(--glass-border); color: white; border-radius: 6px; cursor: pointer; font-size: 0.75rem;`;
+                btn.textContent = i;
+                btn.onclick = () => onPageChange(i);
+                el.appendChild(btn);
+            }
         }
 
         function openEditModal(id, name, cls) {
