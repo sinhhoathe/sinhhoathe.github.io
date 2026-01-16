@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin 4 - Cộng Điểm Rèn Luyện</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: #0f172a; color: white; min-height: 100vh; padding: 20px 5%; }
+
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; margin-bottom: 20px; }
+
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] {
+            flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: #1e293b; color: #ffffff; outline: none;
+        }
+
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+
+        .student-result { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .student-profile { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
+        .profile-img { width: 100px; height: 100px; border-radius: 15px; object-fit: cover; border: 2px solid var(--success); cursor: zoom-in; }
+
+        .star-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(245, 158, 11, 0.2); color: #f59e0b;
+            padding: 5px 12px; border-radius: 20px; font-weight: 700; margin-top: 10px;
+        }
+
+        textarea {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: #1e293b; color: white; outline: none; margin-top: 15px; min-height: 100px;
+        }
+
+        /* Modal Preview */
+        .modal {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 2000;
+            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .modal-content { max-width: 90%; max-height: 90%; border-radius: 20px; border: 2px solid var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Admin 4 - Khen Thưởng</h3>
+            <button style="background: none; border: none; color: white; cursor: pointer;" onclick="logout()">Thoát</button>
+        </div>
+
+        <div class="card">
+            <div class="search-box">
+                <input type="text" id="searchId" placeholder="Nhập MSHS để khen thưởng...">
+                <button class="btn btn-primary" onclick="searchStudent()">Tìm</button>
+            </div>
+
+            <div id="studentResult" class="student-result">
+                <div class="student-profile">
+                    <img id="resImg" class="profile-img" src="" alt="" onclick="showImg(this.src)">
+                    <div>
+                        <h2 id="resName"></h2>
+                        <p id="resInfo" style="color: #94a3b8; font-size: 0.9rem;"></p>
+                        <div class="star-badge">
+                            <span id="resStars">0</span> ⭐
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                    <p style="font-weight: 600;">Ghi chú khen thưởng (+1 sao):</p>
+                    <textarea id="rewardNote" placeholder="Ví dụ: Tham gia trực nhật chuyên cần, Phát biểu hăng hái trên lớp, Nhặt được của rơi trả lại người mất..."></textarea>
+                    
+                    <button class="btn btn-success" onclick="submitReward()">Xác Nhận Tăng Sao</button>
+                </div>
+            </div>
+
+            <div id="noMatch" style="display: none; text-align: center; color: #ef4444; padding: 20px;">
+                Không tìm thấy học sinh với mã số này!
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeImg()">
+        <img class="modal-content" id="imgFull">
+    </div>
+
+    <script src="firebase.config.js"></script>
+    <script>
+        if (sessionStorage.getItem('kyluat_role') !== 'admin4') {
+            window.location.href = 'index.html';
+        }
+
+        function showImg(src) {
+            if(!src) return;
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('imgFull');
+            img.src = src;
+            modal.style.display = 'flex';
+        }
+
+        function closeImg() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        let currentStudent = null;
+
+        async function searchStudent() {
+            const id = document.getElementById('searchId').value.trim().toUpperCase();
+            if(!id) return;
+
+            const snap = await rootRef.child('Students').child(id).once('value');
+            if (snap.exists()) {
+                currentStudent = snap.val();
+                document.getElementById('resImg').src = currentStudent.photo;
+                document.getElementById('resName').textContent = currentStudent.name;
+                document.getElementById('resInfo').textContent = `Lớp: ${currentStudent.class}`;
+                document.getElementById('resStars').textContent = currentStudent.stars || 0;
+                
+                document.getElementById('studentResult').style.display = 'block';
+                document.getElementById('noMatch').style.display = 'none';
+            } else {
+                document.getElementById('studentResult').style.display = 'none';
+                document.getElementById('noMatch').style.display = 'block';
+            }
+        }
+
+        async function submitReward() {
+            const note = document.getElementById('rewardNote').value.trim();
+            if (!note) {
+                alert('Vui lòng ghi lý do khen thưởng!');
+                return;
+            }
+
+            const rewardData = {
+                studentId: currentStudent.studentId,
+                studentName: currentStudent.name,
+                studentClass: currentStudent.class,
+                studentPhoto: currentStudent.photo,
+                violationType: '👍 Khen thưởng: ' + note,
+                timestamp: Date.now(),
+                recordedBy: sessionStorage.getItem('kyluat_id'),
+                type: 'merit'
+            };
+
+            // Treat merit as a "violation" type for history but with positive connotation
+            await rootRef.child('Violations').push(rewardData);
+            
+            // Increment star
+            const studentRef = rootRef.child('Students').child(currentStudent.studentId);
+            await studentRef.transaction(current => {
+                if (current) {
+                    current.stars = (current.stars || 0) + 1;
+                }
+                return current;
+            });
+
+            alert('Đã tặng 1 sao thành công!');
+            location.reload();
+        }
+
+        function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
