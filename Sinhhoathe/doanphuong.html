@@ -350,7 +350,7 @@
           )
         )
           return;
-        const ref = firebase.database().ref("registrations");
+        const ref = firebase.database().ref("Sinhhoathe/Registrations");
         ref.off();
         ref.on("value", (snap) => {
           const raw = snap.val();
@@ -436,7 +436,7 @@
               if (confirm("Chắc chắn xóa?")) {
                 firebase
                   .database()
-                  .ref("registrations")
+                  .ref("Sinhhoathe/Registrations")
                   .child(key)
                   .remove()
                   .then(() => alert("Đã xóa!"))
@@ -475,7 +475,7 @@
           )
         )
           return;
-        const ref = firebase.database().ref("meta");
+        const ref = firebase.database().ref("Sinhhoathe/Meta");
         ref.off();
         ref.on("value", (snap) => {
           META = snap.val() || DEFAULT_META;
@@ -492,7 +492,7 @@
           )
         )
           return Promise.resolve();
-        return firebase.database().ref("meta").set(META);
+        return firebase.database().ref("Sinhhoathe/Meta").set(META);
       }
       function renderMeta() {
         // Schools
@@ -614,7 +614,7 @@
           )
         )
           return;
-        const ref = firebase.database().ref("passwords");
+        const ref = firebase.database().ref("Sinhhoathe/Passwords");
         ref.off();
         ref.on("value", (snap) => {
           PASSWORDS = snap.val() || {};
@@ -630,7 +630,7 @@
           )
         )
           return Promise.resolve();
-        return firebase.database().ref("passwords").set(map);
+        return firebase.database().ref("Sinhhoathe/Passwords").set(map);
       }
       function renderPwList() {
         pwList.innerHTML = "";

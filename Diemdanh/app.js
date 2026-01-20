@@ -32,21 +32,15 @@ function loadConferenceConfig() {
         return;
     }
 
-    if (!ownerUsername) {
-        // Fallback for old links (if any) -> assume single tenant or error
-        // For SaaS mode, owner is REQUIRED
-        showStatus('❌ Lỗi: Link không hợp lệ (Thiếu thông tin chủ sở hữu).', 'error');
-        submitBtn.disabled = true;
-        return;
-    }
+    // Owner username check removed for internal system
 
     if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
         console.error('Firebase not initialized');
         return;
     }
 
-    // Path: tenants/{username}/conferences/{id}
-    const configRef = firebase.database().ref(`tenants/${ownerUsername}/conferences/${conferenceId}`);
+    // Path: Diemdanh/Conferences/{id}
+    const configRef = firebase.database().ref(`Diemdanh/Conferences/${conferenceId}`);
     
     configRef.on('value', (snapshot) => {
         conferenceConfig = snapshot.val();
@@ -208,7 +202,7 @@ async function checkIpDuplicate(ip) {
     
     // Query records by IP (Client-side filtering for simplicity on small datasets)
     // For large scale, we should index 'ip' in Firebase rules
-    const recordsRef = firebase.database().ref(`tenants/${ownerUsername}/records/${conferenceId}`);
+    const recordsRef = firebase.database().ref(`Diemdanh/Records/${conferenceId}`);
     const snapshot = await recordsRef.orderByChild('ip').equalTo(ip).once('value');
     
     return snapshot.exists();
@@ -220,8 +214,8 @@ async function saveAttendance(data) {
         throw new Error('Firebase chưa được khởi tạo');
     }
 
-    // Save to tenant-specific path: tenants/{username}/records/{conferenceId}
-    const attendanceRef = firebase.database().ref(`tenants/${ownerUsername}/records/${conferenceId}`);
+    // Save to Diemdanh path: Diemdanh/Records/{conferenceId}
+    const attendanceRef = firebase.database().ref(`Diemdanh/Records/${conferenceId}`);
     const newRecordRef = attendanceRef.push();
     
     await newRecordRef.set({

@@ -22,7 +22,7 @@ const modalTitle = document.getElementById('modalTitle');
 
 // Check account status real-time
 function checkAccountStatus() {
-    firebase.database().ref(`users/${currentUsername}`).once('value', (snapshot) => {
+    firebase.database().ref(`Diemdanh/Users/${currentUsername}`).once('value', (snapshot) => {
         if (!snapshot.exists()) {
             alert('Tài khoản của bạn đã bị xóa hoặc ngừng kích hoạt!');
             sessionStorage.clear();
@@ -45,14 +45,21 @@ function checkAccountStatus() {
 function loadConferences() {
     checkAccountStatus(); // Verify account first
 
-    const conferencesRef = firebase.database().ref(`tenants/${currentUsername}/conferences`);
+    // Simplified: Load all conferences (or filter by owner if strictly needed, but internal system implies trusted access)
+    // For now, let's load ALL conferences from Diemdanh/Conferences
+    // If you want to filter by owner, we can do it client side or query
+    const conferencesRef = firebase.database().ref(`Diemdanh/Conferences`);
     conferencesRef.on('value', (snapshot) => {
         allConferences = [];
         const data = snapshot.val();
         
         if (data) {
             Object.keys(data).forEach(key => {
-                allConferences.push({ ...data[key], id: key });
+                const conf = { ...data[key], id: key };
+                // Filter by owner client-side to keep list clean
+                if (conf.owner === currentUsername) {
+                    allConferences.push(conf);
+                }
             });
         }
 
@@ -188,7 +195,7 @@ btnSaveConference.addEventListener('click', async () => {
 
     // FINAL SECURITY CHECK: Check if user still exists on server before saving
     try {
-        const userSnapshot = await firebase.database().ref(`users/${currentUsername}`).once('value');
+        const userSnapshot = await firebase.database().ref(`Diemdanh/Users/${currentUsername}`).once('value');
         if (!userSnapshot.exists()) {
             alert('⛔ TÀI KHOẢN ĐÃ BỊ XÓA!\nBạn không còn quyền thực hiện thao tác này.');
             sessionStorage.clear();
@@ -234,7 +241,7 @@ btnSaveConference.addEventListener('click', async () => {
             // so if we don't include 'code' key, it won't change.
             // However, conferenceData currently doesn't have 'code'.
             
-            await firebase.database().ref(`tenants/${currentUsername}/conferences/${editingConferenceId}`).update(conferenceData);
+            await firebase.database().ref(`Diemdanh/Conferences/${editingConferenceId}`).update(conferenceData);
             alert('✓ Đã cập nhật hội nghị!');
         } else {
             // Create new conference
@@ -243,7 +250,7 @@ btnSaveConference.addEventListener('click', async () => {
             conferenceData.code = randomCode;
             conferenceData.createdAt = firebase.database.ServerValue.TIMESTAMP;
             
-            await firebase.database().ref(`tenants/${currentUsername}/conferences`).push(conferenceData);
+            await firebase.database().ref(`Diemdanh/Conferences`).push(conferenceData);
             alert('✓ Đã tạo hội nghị mới!');
         }
 
@@ -304,8 +311,8 @@ window.copyLink = function(conferenceId) {
     if (!conference) return;
 
     const baseUrl = window.location.origin + window.location.pathname.replace('btc-list.html', '');
-    // NEW LINK FORMAT: Need both ID and OWNER
-    const link = `${baseUrl}index.html?c=${conferenceId}&u=${currentUsername}`;
+    // NEW LINK FORMAT: Single tenant, no 'u=' param needed
+    const link = `${baseUrl}index.html?c=${conferenceId}`;
     
     navigator.clipboard.writeText(link).then(() => {
         alert(`✓ Đã sao chép link điểm danh!\n\nLink: ${link}\nMã hội nghị: ${conference.code}`);
@@ -325,9 +332,9 @@ window.deleteConference = async function(conferenceId) {
 
     try {
         // Delete conference
-        await firebase.database().ref(`tenants/${currentUsername}/conferences/${conferenceId}`).remove();
+        await firebase.database().ref(`Diemdanh/Conferences/${conferenceId}`).remove();
         // Delete records associated with it
-        await firebase.database().ref(`tenants/${currentUsername}/records/${conferenceId}`).remove();
+        await firebase.database().ref(`Diemdanh/Records/${conferenceId}`).remove();
         
         alert('✓ Đã xóa hội nghị và dữ liệu điểm danh!');
     } catch (error) {

@@ -61,19 +61,21 @@
       <div class="container">
         <div class="columns is-multiline is-centered">
           <!-- Card 1: Đăng ký thành viên -->
-          <div class="column is-4">
+          <div class="column is-4 is-flex is-flex-direction-column">
             <div
-              class="card p-4 h-100 animate-fade-in"
+              class="card p-4 h-100 animate-fade-in is-flex-grow-1"
               style="animation-delay: 0.1s"
             >
-              <div class="card-content has-text-centered">
-                <span class="icon is-large has-text-info mb-3">
-                  <i class="fas fa-user-plus fa-3x"></i>
-                </span>
-                <p class="title is-4">Đăng ký Sinh hoạt Đoàn
-                <p class="subtitle is-6 mt-2">
-                  Dành cho các bạn chưa có tên trong danh sách quản lý.
-                </p>
+              <div class="card-content has-text-centered is-flex is-flex-direction-column" style="height: 100%">
+                <div class="is-flex-grow-1">
+                  <span class="icon is-large has-text-info mb-3">
+                    <i class="fas fa-user-plus fa-3x"></i>
+                  </span>
+                  <p class="title is-4">Đăng ký Sinh hoạt Đoàn</p>
+                  <p class="subtitle is-6 mt-2">
+                    Dành cho các bạn chưa có tên trong danh sách quản lý.
+                  </p>
+                </div>
                 <a
                   href="register.html"
                   class="button is-info is-fullwidth is-rounded mt-4"
@@ -85,19 +87,21 @@
           </div>
 
           <!-- Card 2: Điểm danh -->
-          <div class="column is-4">
+          <div class="column is-4 is-flex is-flex-direction-column">
             <div
-              class="card p-4 h-100 animate-fade-in"
+              class="card p-4 h-100 animate-fade-in is-flex-grow-1"
               style="animation-delay: 0.2s"
             >
-              <div class="card-content has-text-centered">
-                <span class="icon is-large has-text-success mb-3">
-                  <i class="fas fa-map-marker-alt fa-3x"></i>
-                </span>
-                <p class="title is-4">Điểm danh Sinh hoạt</p>
-                <p class="subtitle is-6 mt-2">
-                  Check-in tham gia buổi sinh hoạt đoàn tại địa điểm tổ chức.
-                </p>
+              <div class="card-content has-text-centered is-flex is-flex-direction-column" style="height: 100%">
+                <div class="is-flex-grow-1">
+                  <span class="icon is-large has-text-success mb-3">
+                    <i class="fas fa-map-marker-alt fa-3x"></i>
+                  </span>
+                  <p class="title is-4">Điểm danh Sinh hoạt</p>
+                  <p class="subtitle is-6 mt-2">
+                    Check-in tham gia buổi sinh hoạt đoàn tại địa điểm tổ chức.
+                  </p>
+                </div>
                 <a
                   href="attendance.html"
                   class="button is-success is-fullwidth is-rounded mt-4"
@@ -109,19 +113,21 @@
           </div>
 
           <!-- Card 3: Tra cứu (Optional) -->
-          <div class="column is-4">
+          <div class="column is-4 is-flex is-flex-direction-column">
             <div
-              class="card p-4 h-100 animate-fade-in"
+              class="card p-4 h-100 animate-fade-in is-flex-grow-1"
               style="animation-delay: 0.3s"
             >
-              <div class="card-content has-text-centered">
-                <span class="icon is-large has-text-warning mb-3">
-                  <i class="fas fa-calendar-alt fa-3x"></i>
-                </span>
-                <p class="title is-4">Bảng vàng Thành tích</p>
-                <p class="subtitle is-6 mt-2">
-                  Tra cứu danh sách Đoàn viên và số sao tích lũy.
-                </p>
+              <div class="card-content has-text-centered is-flex is-flex-direction-column" style="height: 100%">
+                <div class="is-flex-grow-1">
+                  <span class="icon is-large has-text-warning mb-3">
+                    <i class="fas fa-calendar-alt fa-3x"></i>
+                  </span>
+                  <p class="title is-4">Bảng vàng Thành tích</p>
+                  <p class="subtitle is-6 mt-2">
+                    Tra cứu danh sách Đoàn viên và số sao tích lũy.
+                  </p>
+                </div>
                 <a href="members.html" class="button is-warning is-fullwidth is-rounded mt-4">
                   🏆 Xem bảng vàng
                 </a>
@@ -137,8 +143,8 @@
       <div class="container">
         <div class="columns">
           <!-- Cách thức tiến hành -->
-          <div class="column is-6">
-            <div class="box h-100 shadow-animate">
+          <div class="column is-6 is-flex is-flex-direction-column">
+            <div class="box h-100 shadow-animate is-flex-grow-1">
               <h3 class="title is-4 has-text-primary">
                 <span class="icon mr-2"><i class="fas fa-tasks"></i></span>
                 Cách thức tiến hành
@@ -156,8 +162,8 @@
           </div>
 
           <!-- Quy chế đánh giá -->
-          <div class="column is-6">
-            <div class="box h-100 shadow-animate">
+          <div class="column is-6 is-flex is-flex-direction-column">
+            <div class="box h-100 shadow-animate is-flex-grow-1">
               <h3 class="title is-4 has-text-link">
                 <span class="icon mr-2"><i class="fas fa-gavel"></i></span>
                 Quy chế đánh giá
@@ -198,6 +204,10 @@
                 <i class="fas fa-exclamation-triangle mr-1"></i>
                 <em>Lưu ý: Tất cả kết quả sẽ được gửi về các trường học để phản ánh đúng thực tế sinh hoạt hè của Đoàn viên.</em>
               </p>
+              <div class="notification is-warning is-light mt-3">
+                <span class="icon has-text-warning"><i class="fas fa-trophy"></i></span>
+                <strong>Đặc biệt:</strong> 10 bạn có số sao nhiều nhất sẽ được nhận giấy khen của Đoàn phường.
+              </div>
             </div>
           </div>
         </div>

@@ -249,7 +249,7 @@
       // Subscribe passwords
       function subscribePasswords() {
         if (!hasFirebase()) return;
-        const ref = firebase.database().ref("passwords");
+        const ref = firebase.database().ref("Sinhhoathe/Passwords");
         ref.off();
         ref.on("value", (s) => {
           PASSWORDS = s.val() || {};
@@ -258,7 +258,7 @@
       // Subscribe meta to fill school options and resolve ward
       function subscribeMeta() {
         if (!hasFirebase()) return;
-        const ref = firebase.database().ref("meta");
+        const ref = firebase.database().ref("Sinhhoathe/Meta");
         ref.off();
         ref.on("value", (s) => {
           META = s.val() || { schools: [], wards: [], hamlets: {} };
@@ -278,7 +278,7 @@
       // Subscribe registrations
       function subscribeRegistrations() {
         if (!hasFirebase()) return;
-        const ref = firebase.database().ref("registrations");
+        const ref = firebase.database().ref("Sinhhoathe/Registrations");
         ref.off();
         ref.on("value", (snap) => {
           const raw = snap.val();
@@ -484,7 +484,7 @@
           updates.push(
             firebase
               .database()
-              .ref("registrations")
+              .ref("Sinhhoathe/Registrations")
               .child(key)
               .child("grade")
               .set(val)

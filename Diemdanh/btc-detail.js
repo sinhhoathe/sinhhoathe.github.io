@@ -38,7 +38,7 @@ function getConferenceIdFromUrl() {
 
 // Check account status real-time
 function checkAccountStatus() {
-    firebase.database().ref(`users/${currentUsername}`).once('value', (snapshot) => {
+    firebase.database().ref(`Diemdanh/Users/${currentUsername}`).once('value', (snapshot) => {
         if (!snapshot.exists()) {
             alert('Tài khoản của bạn đã bị xóa hoặc ngừng kích hoạt!');
             sessionStorage.clear();
@@ -58,8 +58,8 @@ function loadConferenceData() {
         return;
     }
 
-    // Path: tenants/{username}/conferences/{id}
-    const confRef = firebase.database().ref(`tenants/${currentUsername}/conferences/${conferenceId}`);
+    // Path: Diemdanh/Conferences/{id}
+    const confRef = firebase.database().ref(`Diemdanh/Conferences/${conferenceId}`);
     confRef.on('value', (snapshot) => {
         conferenceData = snapshot.val();
         if (!conferenceData) {
@@ -99,8 +99,8 @@ function displayConferenceInfo() {
 function loadAttendanceRecords() {
     if (!conferenceId) return;
 
-    // Path: tenants/{username}/records/{conferenceId}
-    const recordsRef = firebase.database().ref(`tenants/${currentUsername}/records/${conferenceId}`);
+    // Path: Diemdanh/Records/{conferenceId}
+    const recordsRef = firebase.database().ref(`Diemdanh/Records/${conferenceId}`);
     recordsRef.on('value', (snapshot) => {
         allRecords = [];
         const data = snapshot.val();
@@ -188,7 +188,7 @@ manualForm.addEventListener('submit', async (e) => {
     };
 
     try {
-        await firebase.database().ref(`tenants/${currentUsername}/records/${conferenceId}`).push(manualData);
+        await firebase.database().ref(`Diemdanh/Records/${conferenceId}`).push(manualData);
         alert('✓ Đã thêm điểm danh thủ công!');
         manualForm.reset();
     } catch (error) {
@@ -204,7 +204,7 @@ window.deleteRecord = async function(recordId) {
     }
 
     try {
-        await firebase.database().ref(`tenants/${currentUsername}/records/${conferenceId}/${recordId}`).remove();
+        await firebase.database().ref(`Diemdanh/Records/${conferenceId}/${recordId}`).remove();
         alert('✓ Đã xóa bản ghi!');
     } catch (error) {
         console.error('Error deleting record:', error);
@@ -244,7 +244,7 @@ refreshBtn.addEventListener('click', () => {
 // Copy attendance link
 btnCopyLink.addEventListener('click', () => {
     const baseUrl = window.location.origin + window.location.pathname.replace('btc-detail.html', '');
-    const link = `${baseUrl}index.html?c=${conferenceId}&u=${currentUsername}`;
+    const link = `${baseUrl}index.html?c=${conferenceId}`;
     
     navigator.clipboard.writeText(link).then(() => {
         alert(`✓ Đã sao chép link điểm danh!\n\nLink: ${link}\nMã hội nghị: ${conferenceData.code}`);

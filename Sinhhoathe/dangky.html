@@ -349,7 +349,7 @@
           return;
         }
 
-        const metaRef = firebase.database().ref("meta");
+        const metaRef = firebase.database().ref("Sinhhoathe/Meta");
         metaRef.on("value", (snap) => {
           const data = snap.val() || {};
           META_CACHE = {
@@ -547,7 +547,7 @@
           return;
         }
 
-        const ref = firebase.database().ref("registrations");
+        const ref = firebase.database().ref("Sinhhoathe/Registrations");
         ref.on("value", (snap) => {
           ALL_REGISTRATIONS = [];
           const data = snap.val();
@@ -583,7 +583,7 @@
           window.firebase.apps &&
           window.firebase.apps.length
         ) {
-          return firebase.database().ref("registrations").push(payload);
+          return firebase.database().ref("Sinhhoathe/Registrations").push(payload);
         }
         return Promise.reject(new Error("firebase_not_available"));
       }

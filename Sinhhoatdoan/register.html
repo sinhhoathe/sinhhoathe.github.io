@@ -56,7 +56,7 @@
                         <div class="field">
                             <label class="label">Họ và tên <span class="has-text-danger">*</span></label>
                             <div class="control has-icons-left">
-                                <input class="input" type="text" id="fullName" placeholder="VD: NGUYỄN VĂN A" required>
+                                <input class="input" type="text" id="fullName" placeholder="VD: NGUYỄN VĂN A" required oninput="this.value = this.value.toUpperCase()" style="text-transform: uppercase;">
                                 <span class="icon is-small is-left">
                                     <i class="fas fa-user"></i>
                                 </span>
@@ -93,28 +93,38 @@
                         <div class="field">
                             <label class="label">Trường học hiện tại</label>
                             <div class="control has-icons-left">
-                                <input class="input" type="text" id="school" placeholder="VD: THPT Chuyên Lào Cai">
+                                <div class="select is-fullwidth">
+                                    <select id="school">
+                                        <option value="">-- Đang tải dữ liệu... --</option>
+                                    </select>
+                                </div>
                                 <span class="icon is-small is-left">
                                     <i class="fas fa-school"></i>
                                 </span>
                             </div>
+                            <input class="input mt-2 is-hidden" type="text" id="schoolManual" placeholder="Nhập tên trường của bạn...">
                             <p class="help is-info">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                <i>Ví dụ: Nếu năm học 2025-2026 bạn đang học ở trường THPT Chuyên Lào Cai thì nhập THPT Chuyên Lào Cai.</i>
+                                <i>Chọn "Khác" nếu không tìm thấy trường của bạn.</i>
                             </p>
                         </div>
 
                         <div class="field">
                             <label class="label">Lớp hiện tại</label>
-                            <div class="control has-icons-left">
-                                <input class="input" type="text" id="className" placeholder="VD: 12A1">
+                            <div class="control has-icons-left" id="classSelectControl">
+                                <div class="select is-fullwidth">
+                                    <select id="className">
+                                        <option value="">-- Đang tải dữ liệu... --</option>
+                                    </select>
+                                </div>
                                 <span class="icon is-small is-left">
                                     <i class="fas fa-chalkboard"></i>
                                 </span>
                             </div>
+                            <input class="input mt-2 is-hidden" type="text" id="classManual" placeholder="Nhập tên lớp của bạn...">
                             <p class="help is-info">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                <i>Ví dụ: Nếu năm học 2025-2026 bạn đang học ở lớp 10A1 thì nhập 10A1.</i>
+                                <i>Ví dụ: 10A1, 12D2...</i>
                             </p>
                         </div>
 
@@ -167,8 +177,26 @@
             const fullName = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const birthYear = document.getElementById('birthYear').value.trim();
-            const school = document.getElementById('school').value.trim();
-            const className = document.getElementById('className').value.trim();
+            const schoolEl = document.getElementById('school');
+            const classEl = document.getElementById('className');
+            const schoolManual = document.getElementById('schoolManual');
+            const classManual = document.getElementById('classManual');
+            
+            // Logic lấy dữ liệu
+            let school = "";
+            if (schoolEl.value === 'OTHER') {
+                school = schoolManual.value.trim();
+            } else if (schoolEl.value) {
+                school = schoolEl.options[schoolEl.selectedIndex].text;
+            }
+
+            let className = "";
+            // Nếu Trường là Khác HOẶC Lớp là Khác -> Lấy từ Manual Input
+            if (schoolEl.value === 'OTHER' || classEl.value === 'OTHER') {
+                className = classManual.value.trim();
+            } else if (classEl.value) {
+                className = classEl.options[classEl.selectedIndex].text;
+            }
 
             if (fullName.length < 2) {
                 document.getElementById('errName').classList.remove('is-hidden');
@@ -227,6 +255,101 @@
                 btnSubmit.disabled = false;
             }
         });
+
+        // Load Metadata for Selects
+        function loadRegisterMetadata() {
+            db.ref('sinhhoatdoan/metadata/schools').once('value', snap => {
+                const data = snap.val() || {};
+                fillSelect('school', data, '-- Chọn trường --');
+            });
+        }
+
+        function fillSelect(id, dataObj, defaultText) {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = `<option value="">${defaultText}</option>`;
+            
+            // Add OTHER option
+            const otherOpt = document.createElement('option');
+            otherOpt.value = "OTHER";
+            otherOpt.textContent = "✎ Khác (Tự nhập)";
+            otherOpt.style.fontWeight = "bold";
+            otherOpt.style.color = "#00d1b2";
+            sel.appendChild(otherOpt);
+
+            if (!dataObj) return;
+            
+            // Convert to array of {key, val} and sort alphabetically by val
+            const arr = Object.entries(dataObj).map(([key, val]) => ({key, val}))
+                              .sort((a,b) => a.val.localeCompare(b.val));
+            
+            // Insert before OTHER? Or after? Usually OTHER is last.
+            // Let's remove OTHER first if we want strict order, but appending after default is fine.
+            // Actually, let's put OTHER at the end.
+            sel.removeChild(otherOpt);
+            
+            arr.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.key;
+                opt.textContent = item.val;
+                sel.appendChild(opt);
+            });
+            
+            // Append Other again at bottom
+            sel.appendChild(otherOpt);
+        }
+        
+        // Handle School Change
+        document.getElementById('school').addEventListener('change', (e) => {
+            const schoolId = e.target.value;
+            const classSelect = document.getElementById('className');
+            const schoolManual = document.getElementById('schoolManual');
+            const classManual = document.getElementById('classManual');
+            const classControl = document.getElementById('classSelectControl');
+
+            // Reset UI
+            schoolManual.classList.add('is-hidden');
+            classManual.classList.add('is-hidden');
+            classControl.classList.remove('is-hidden');
+            classSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+
+            if (!schoolId) {
+                classSelect.innerHTML = '<option value="">-- Chọn lớp --</option>';
+                return;
+            }
+
+            if (schoolId === 'OTHER') {
+                // Show School Manual Input
+                schoolManual.classList.remove('is-hidden');
+                // Hide Class Select, Show Class Manual Input immediately (because no classes to load)
+                classControl.classList.add('is-hidden');
+                classManual.classList.remove('is-hidden');
+                return;
+            }
+
+            // Normal School Selected
+            db.ref(`sinhhoatdoan/metadata/classes/${schoolId}`).once('value', snap => {
+                const data = snap.val() || {};
+                fillSelect('className', data, '-- Chọn lớp --');
+                if (!data || Object.keys(data).length === 0) {
+                     // Nếu trường chưa có lớp nào -> Vẫn hiện select nhưng chỉ có Khác?
+                     // Hàm fillSelect đã tự thêm Khác rồi.
+                }
+            });
+        });
+
+        // Handle Class Change (for OTHER case)
+        document.getElementById('className').addEventListener('change', (e) => {
+            const val = e.target.value;
+            const classManual = document.getElementById('classManual');
+            if (val === 'OTHER') {
+                classManual.classList.remove('is-hidden');
+            } else {
+                classManual.classList.add('is-hidden');
+            }
+        });
+        
+        loadRegisterMetadata();
     </script>
 </body>
 </html>

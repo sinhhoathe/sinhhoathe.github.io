@@ -126,7 +126,7 @@
 
             try {
                 // Check against Firebase Database
-                const snapshot = await firebase.database().ref(`users/${username}`).once('value');
+                const snapshot = await firebase.database().ref(`Diemdanh/Users/${username}`).once('value');
                 const user = snapshot.val();
 
                 if (!user) {
