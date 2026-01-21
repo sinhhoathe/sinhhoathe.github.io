@@ -454,7 +454,7 @@
         // Restore Admin Management Logic
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = document.getElementById('adminId').value.trim();
+            const id = document.getElementById('adminId').value.trim().toUpperCase();
             const pass = document.getElementById('adminPass').value.trim();
             const role = document.getElementById('adminRole').value;
             
