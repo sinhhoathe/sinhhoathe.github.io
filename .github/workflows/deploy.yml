@@ -32,17 +32,12 @@ jobs:
         run: |
           javascript-obfuscator ./ --output ./dist --compact true --self-defending true --string-array true --string-array-encoding 'base64' --string-array-threshold 1
 
-      - name: Minify HTML
+      - name: Minify HTML files
+        # Tìm tất cả file .html và nén chúng vào thư mục dist tương ứng
         run: |
-          npm install -g html-minifier
-          # Nén file index.html gốc
-          html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true index.html -o dist/index.html || true
-          
-          # Dùng vòng lặp để nén TẤT CẢ file html trong các thư mục con
-          find . -name "*.html" -not -path "./dist/*" -not -path "./node_modules/*" | while read file; do
-            mkdir -p "dist/$(dirname "$file")"
-            html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true "$file" -o "dist/$file"
-          done
+          find ./ -maxdepth 2 -name "*.html" -not -path "./dist/*" -exec sh -c 'html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true "$1" -o "./dist/$1"' _ {} \;
+
+      - name: Copy other static files (CSS, Images, CNAME)
         # Copy các tài nguyên còn lại, loại trừ JS (đã làm rối) và HTML (đã nén)
         run: |
           cp CNAME ./dist/ || true
