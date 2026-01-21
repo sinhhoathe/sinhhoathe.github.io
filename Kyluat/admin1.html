@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -257,7 +258,10 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
                     <h3 style="font-size: 1.1rem;">📑 Quản Lý Vi Phạm</h3>
-                    <input type="text" id="searchViolation" placeholder="Tìm tên..." style="width: 150px; padding: 8px 12px; font-size: 0.8rem; border-radius: 12px;" oninput="filterViolations()">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" style="background: #0ea5e9; color: white; padding: 8px 12px; font-size: 0.75rem; width: auto; border-radius: 10px;" onclick="exportViolationsExcel()">📥 Xuất Excel</button>
+                        <input type="text" id="searchViolation" placeholder="Tìm tên..." style="width: 150px; padding: 8px 12px; font-size: 0.8rem; border-radius: 12px;" oninput="filterViolations()">
+                    </div>
                 </div>
                 <div style="max-height: 500px; overflow-y: auto;">
                     <table style="margin-top: 0;">
@@ -272,6 +276,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
                     <h3 style="font-size: 1.1rem;">🎓 Học Sinh</h3>
                     <div style="display: flex; gap: 10px;">
+                        <button class="btn" style="background: #0ea5e9; color: white; padding: 8px 12px; font-size: 0.75rem; width: auto; border-radius: 10px;" onclick="exportStudentsExcel()">📥 Xuất Excel</button>
                         <button class="btn" style="background: #4338ca; color: white; padding: 8px 12px; font-size: 0.75rem; width: auto; border-radius: 10px;" onclick="recalculateAllStars()">🔄 Tính lại</button>
                         <input type="text" id="searchStudent" placeholder="Tên/Lớp..." style="width: 120px; padding: 8px 12px; font-size: 0.8rem; border-radius: 12px;" oninput="filterStudents()">
                     </div>
@@ -289,6 +294,87 @@
                     </table>
                 </div>
                 <div class="pagination" id="studentPagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+
+        <!-- User Guide Section -->
+        <div class="card" style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleGuide()">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;"><span>📚</span> Hướng Dẫn Sử Dụng Chi Tiết (Admin 1)</h3>
+                <span id="guideIcon" style="font-weight: bold;">▼</span>
+            </div>
+            <div id="guideContent" style="display: none; margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px; line-height: 1.6; color: #cbd5e1;">
+                
+                <!-- Section 1: Role Definitions -->
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-size: 1.1rem; border-left: 3px solid var(--primary); padding-left: 10px;">1. Phân Quyền & Chức Năng Hệ Thống</h4>
+                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px;">
+                        <strong style="color: #fbbf24;">👑 Admin 1 - Quản Trị Viên (Bạn)</strong>
+                        <p style="margin-top: 5px; font-size: 0.9rem;">
+                            - <b>Quyền hạn:</b> Kiểm soát toàn bộ hệ thống (Full Access).<br>
+                            - <b>Nhiệm vụ:</b> Tạo tài khoản cho các Admin con, Cấu hình danh mục lỗi/thưởng, Quản lý lớp học, Sửa/Xóa dữ liệu sai, Xuất báo cáo Excel.
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px;">
+                        <strong style="color: #818cf8;">👤 Admin 2 - Nhân Sự (Nhập Liệu)</strong>
+                        <p style="margin-top: 5px; font-size: 0.9rem;">
+                            - <b>Quyền hạn:</b> Thêm học sinh mới vào hệ thống.<br>
+                            - <b>Nhiệm vụ:</b> Đầu năm học hoặc khi có học sinh chuyển đến, Admin 2 sẽ nhập thông tin (Tên, Lớp, Ảnh) để tạo dữ liệu nền.
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px;">
+                        <strong style="color: #ef4444;">🚩 Admin 3 - Cờ Đỏ (Kỷ Luật)</strong>
+                        <p style="margin-top: 5px; font-size: 0.9rem;">
+                            - <b>Quyền hạn:</b> Tìm kiếm học sinh và Ghi nhận lỗi vi phạm.<br>
+                            - <b>Nhiệm vụ:</b> Hàng ngày đi kiểm tra, nếu phát hiện học sinh vi phạm thì ghi vào hệ thống để trừ điểm thi đua.
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px;">
+                        <strong style="color: #10b981;">✨ Admin 4 - Thi Đua (Khen Thưởng)</strong>
+                        <p style="margin-top: 5px; font-size: 0.9rem;">
+                            - <b>Quyền hạn:</b> Tìm kiếm học sinh và Ghi nhận thành tích.<br>
+                            - <b>Nhiệm vụ:</b> Ghi lại các việc làm tốt, điểm tốt để cộng điểm thi đua cho học sinh.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section 2: Important Notes -->
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: var(--danger); margin-bottom: 10px; font-size: 1.1rem; border-left: 3px solid var(--danger); padding-left: 10px;">2. Các Lưu Ý Quan Trọng (Cần Đọc Kỹ)</h4>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <b style="color: #e2e8f0;">⚙️ Về Cấu Hình Điểm:</b>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #94a3b8;">
+                            - <b>Điểm Ban Đầu:</b> Là số điểm "vốn" mà mỗi học sinh có khi bắt đầu (VD: 100 điểm). Nếu bạn sửa số này ở phần Cấu hình, toàn bộ học sinh sẽ bị tính lại điểm.<br>
+                            - <b>Danh mục Lỗi/Thưởng:</b> Admin 3 và 4 chỉ chọn được các lỗi/thưởng mà bạn đã tạo ở Admin 1. Hãy cấu hình đầy đủ trước khi giao quyền cho họ.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <b style="color: #e2e8f0;">⚠️ Về Chức Năng Reset/Xóa:</b>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #94a3b8;">
+                            - Nút <span style="color:#ef4444; border:1px solid #ef4444; padding:0 4px; border-radius:4px; font-size:0.7rem;">🗑️ Xóa sạch toàn bộ</span> cực kỳ nguy hiểm. Nó sẽ xóa trắng lịch sử vi phạm của cả trường. <b>Chỉ dùng khi bắt đầu năm học mới.</b><br>
+                            - Nút <span style="color:#f59e0b; border:1px solid #f59e0b; padding:0 4px; border-radius:4px; font-size:0.7rem;">⚠️ Reset toàn bộ</span> sẽ xóa sạch các loại điểm cộng/trừ và đưa tất cả về mức điểm ban đầu.
+                        </p>
+                    </div>
+
+                    <div>
+                        <b style="color: #e2e8f0;">🔄 Về Hoàn Tác & Tính Lại:</b>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #94a3b8;">
+                            - <b>Hoàn tác (Undo):</b> Khi bạn xóa một dòng trong "Lịch sử Vi phạm", hệ thống sẽ tự động bù lại điểm cho học sinh đó (Ví dụ: Xóa lỗi đi muộn -2 điểm -> Học sinh được cộng lại 2 điểm).<br>
+                            - <b>Tính Lại (Recalculate):</b> Nếu bạn cảm thấy điểm số hiển thị không khớp (do lỗi mạng hoặc lỗi hệ thống), hãy nhấn nút <span style="background:#4338ca; color:white; padding:2px 6px; border-radius:4px; font-size:0.7rem;">🔄 Tính lại</span>. Hệ thống sẽ cộng trừ lại từ đầu dựa trên lịch sử để ra số điểm chính xác nhất.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px; font-size: 0.8rem; color: #64748b; font-style: italic;">
+                    Hệ thống Kỷ luật trân trọng cảm ơn bạn đã vận hành! <br>
+                    Mọi thắc mắc kỹ thuật vui lòng liên hệ đội ngũ phát triển.
+                </div>
             </div>
         </div>
     </div>
@@ -793,11 +879,12 @@
 
         window.closeEditModal = () => document.getElementById('editStudentModal').style.display = 'none';
 
-        // Class Management Logic (Missing in previous view, adding essential listener)
+        // Class Management Logic
         rootRef.child('Classes').on('value', snap => {
             const list = document.getElementById('classListArea');
             const editSel = document.getElementById('editClass');
             if(list) list.innerHTML = '';
+            
             if(editSel) editSel.innerHTML = '<option value="">-- Chọn lớp --</option>';
             
             snap.forEach(c => {
@@ -818,6 +905,67 @@
             });
         });
 
+        // --- Export Functions ---
+        function exportViolationsExcel() {
+            if (!allViolations || allViolations.length === 0) return alert('Không có dữ liệu vi phạm để xuất!');
+            
+            // 1. Format Data
+            const dataToExport = allViolations.map(v => ({
+                'Thời gian': new Date(v.timestamp).toLocaleString('vi-VN'),
+                'Họ và Tên': v.studentName,
+                'Lớp': v.studentClass,
+                'Nội dung': v.violationType,
+                'Biến động điểm': (v.violationType.includes('Khen thưởng') ? '+' : '-') + (v.totalPoints || 0)
+            }));
+
+            // 2. Create Worksheet
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            
+            // Adjust column widths
+            const wscols = [
+                {wch: 20}, // Time
+                {wch: 20}, // Name
+                {wch: 10}, // Class
+                {wch: 40}, // Content
+                {wch: 15}  // Points
+            ];
+            ws['!cols'] = wscols;
+
+            // 3. Create Workbook and Export
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Lịch sử Vi phạm");
+            XLSX.writeFile(wb, `Danh_Sach_Vi_Pham_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.xlsx`);
+        }
+
+        function exportStudentsExcel() {
+            if (!allStudents || allStudents.length === 0) return alert('Không có dữ liệu học sinh để xuất!');
+
+            // 1. Format Data
+            const dataToExport = allStudents.map(s => ({
+                'Mã học sinh': s.id,
+                'Họ và Tên': s.name,
+                'Lớp': s.class,
+                'Điểm thi đua (Sao)': s.stars || 0
+            }));
+
+            // 2. Create Worksheet
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            
+            // Adjust column widths
+            const wscols = [
+                {wch: 15}, // ID
+                {wch: 25}, // Name
+                {wch: 10}, // Class
+                {wch: 15}  // Stars
+            ];
+            ws['!cols'] = wscols;
+
+            // 3. Create Workbook and Export
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Danh sách Học sinh");
+            XLSX.writeFile(wb, `Danh_Sach_Hoc_Sinh_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.xlsx`);
+        }
+
         document.getElementById('createClassForm').addEventListener('submit', async(e) => {
             e.preventDefault();
             const name = document.getElementById('className').value.trim();
@@ -829,6 +977,17 @@
         
         async function deleteClass(name) {
             if(confirm(`Xóa lớp ${name}?`)) await rootRef.child(`Classes/${name}`).remove();
+        }
+        function toggleGuide() {
+            const content = document.getElementById('guideContent');
+            const icon = document.getElementById('guideIcon');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            }
         }
     </script>
 </body>
