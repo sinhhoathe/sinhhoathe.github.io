@@ -2,7 +2,7 @@ name: Obfuscate and Deploy
 on:
   push:
     branches:
-      - main # Kiểm tra kỹ nếu nhánh của bạn là 'master' thì sửa lại nhé
+      - main
 
 jobs:
   build-and-deploy:
@@ -20,27 +20,26 @@ jobs:
         run: npm install -g javascript-obfuscator
 
       - name: Prepare dist folder
-        run: mkdir -p dist
-
-      - name: Obfuscate JS files
-        # Lệnh này sẽ quét toàn bộ và tạo bản mã hóa vào dist
         run: |
-          javascript-obfuscator ./ --output ./dist --compact true --self-defending true --string-array true --string-array-encoding 'base64'
+          mkdir -p dist
+          # Tạo sẵn cấu trúc thư mục giống hệt bản gốc bên trong dist
+          mkdir -p "dist/Diemdanh" "dist/Kyluat" "dist/Sinhhoatdoan" "dist/Sinhhoathe"
 
-      - name: Copy static files
-        # Dùng dấu ngoặc kép "" để bao quanh tên thư mục có khoảng trắng
+      - name: Obfuscate ALL JS files
+        # Lệnh này sẽ quét CẢ THƯ MỤC GỐC VÀ CÁC THƯ MỤC CON để mã hóa từng file .js một
+        run: |
+          javascript-obfuscator ./ --output ./dist --compact true --self-defending true --string-array true --string-array-encoding 'base64' --string-array-threshold 1
+
+      - name: Copy static files (HTML, CSS, Images, CNAME)
+        # Bước này cực kỳ quan trọng: chỉ copy file giao diện, không copy đè file .js gốc vào dist
         run: |
           cp index.html ./dist/ || true
           cp CNAME ./dist/ || true
-          cp -r "Diem danh" ./dist/ || true
-          cp -r "Kyluat" ./dist/ || true
-          cp -r "Sinhhoatdoan" ./dist/ || true
-          cp -r "Sinhhoathe" ./dist/ || true
-
-      - name: Clean up original JS in dist
-        # Chỉ giữ lại các file JS đã được làm rối, xóa file JS gốc nếu lỡ bị copy đè
-        run: |
-          find ./dist -name "*.js" -not -path "*/dist/*"
+          # Sử dụng rsync để copy toàn bộ ảnh, html, css nhưng loại trừ các file .js gốc
+          rsync -av --exclude='*.js' Diemdanh/ dist/Diemdanh/ || true
+          rsync -av --exclude='*.js' Kyluat/ dist/Kyluat/ || true
+          rsync -av --exclude='*.js' Sinhhoatdoan/ dist/Sinhhoatdoan/ || true
+          rsync -av --exclude='*.js' Sinhhoathe/ dist/Sinhhoathe/ || true
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
