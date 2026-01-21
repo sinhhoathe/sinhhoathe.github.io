@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điểm danh Sinh hoạt Đoàn - Đoàn phường Lào Cai</title>
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0084ff;
+            --success: #00c853;
+            --warning: #ffab00;
+            --danger: #ff3d00;
+            --bg-light: #f8faff;
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-light);
+            color: #2d3436;
+            min-height: 100vh;
+        }
+
+        /* Navbar Styling */
+        .custom-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Hero Text Area */
+        .page-header {
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+            background: linear-gradient(to bottom, #ffffff, var(--bg-light));
+        }
+        .page-header h1 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+        .page-header .highlight-text {
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Section Styling */
+        .section-title {
+            padding: 0 1rem;
+            margin: 2rem 0 1rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+
+        /* Event Grid */
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 0 1rem 3rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .event-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .event-item {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+        }
+
+        .event-item.is-open {
+            border-top: 5px solid var(--primary);
+            background: #fff;
+        }
+
+        .event-item.is-open:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 132, 255, 0.1);
+        }
+
+        .event-item.is-closed {
+            background: #f8f9fa;
+            border-top: 5px solid #bdc3c7;
+            opacity: 0.8;
+        }
+
+        .event-item.is-closed .event-title { color: #7f8c8d; }
+
+        .event-status-pill {
+            display: inline-flex;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+            width: fit-content;
+        }
+        .pill-open { background: rgba(0, 132, 255, 0.1); color: var(--primary); }
+        .pill-closed { background: rgba(0, 0, 0, 0.05); color: #7f8c8d; }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .event-meta-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            background: #f1f3f5;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .meta-item i { color: var(--primary); }
+
+        .btn-checkin {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            width: 100%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .btn-checkin:hover { background: #0073e6; }
+        
+        .closed-notice {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #95a5a6;
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* Modal Transitions */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-background {
+            background-color: rgba(10, 25, 47, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-card {
+            max-width: 450px;
+            width: 90%;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        .modal-card-body {
+            padding: 2rem 1.5rem;
+        }
+
+        /* Form Controls */
+        .label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .input {
+            border-radius: 12px;
+            border: 2px solid #edf2f7;
+            padding: 1.2rem 1rem 1.2rem 2.5rem;
+            height: auto;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.1);
+        }
+
+        /* GPS Status Box */
+        .gps-stat-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e9ecef;
+        }
+        .gps-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .gps-text-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #adb5bd; margin-bottom: 2px; }
+        .gps-text-status { font-size: 0.95rem; font-weight: 600; }
+
+        .stat-searching { color: var(--warning); }
+        .icon-searching { background: rgba(255, 171, 0, 0.1); color: var(--warning); }
+        
+        .stat-ok { color: var(--success); }
+        .icon-ok { background: rgba(0, 200, 83, 0.1); color: var(--success); }
+        
+        .stat-error { color: var(--danger); }
+        .icon-error { background: rgba(255, 61, 0, 0.1); color: var(--danger); }
+
+        /* Animations */
+        @keyframes pulse-soft {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pulse { animation: pulse-soft 2s infinite ease-in-out; }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-up { animation: slideUp 0.4s ease-out forwards; }
+
+        .preserve-newline {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="custom-nav shadow-sm">
+        <div class="container is-max-desktop">
+            <div class="is-flex is-justify-content-space-between is-align-items-center px-4 py-3">
+                <a href="index.html" class="has-text-grey-dark">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <span class="has-text-weight-bold">SINH HOẠT ĐOÀN</span>
+                <div style="width: 20px;"></div> <!-- Spacer -->
+            </div>
+        </div>
+    </nav>
+
+    <div class="container is-max-desktop">
+        <div class="page-header animate-up">
+            <h1>Điểm danh điện tử</h1>
+            <p class="has-text-grey is-size-7 mt-1">Vui lòng chọn buổi sinh hoạt và bật GPS để thực hiện.</p>
+        </div>
+
+        <!-- Initial Loader -->
+        <div id="loadingScreen" class="py-6 has-text-centered">
+            <div class="pulse">
+                <span class="icon is-large has-text-primary">
+                    <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+                </span>
+            </div>
+            <p class="mt-4 has-text-grey-light">Đang đồng bộ dữ liệu...</p>
+        </div>
+
+        <!-- No Data State -->
+        <div id="emptyScreen" class="py-6 has-text-centered is-hidden px-4">
+            <div class="mb-4">
+                <span class="icon is-large has-text-grey-lighter" style="font-size: 4rem;">
+                    <i class="far fa-calendar-times"></i>
+                </span>
+            </div>
+            <h2 class="title is-5">Chưa có hoạt động nào</h2>
+            <p class="has-text-grey">Hiện tại không có buổi sinh hoạt nào diễn ra hoặc đã kết thúc tất cả.</p>
+        </div>
+
+        <!-- Main List -->
+        <div id="mainContent" class="is-hidden pb-6">
+            <div id="eventList" class="event-grid">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Modal -->
+    <div id="checkInModal" class="modal">
+        <div class="modal-background" onclick="closeModal()"></div>
+        <div class="modal-card animate-up">
+            <section class="modal-card-body">
+                <div class="has-text-centered mb-5">
+                    <h3 id="modalName" class="title is-5 mb-1">...</h3>
+                    <p id="modalTime" class="is-size-7 has-text-grey"></p>
+                </div>
+
+                <form id="attendanceForm">
+                    <div class="field">
+                        <label class="label">Số điện thoại đăng ký</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="tel" id="userPhone" placeholder="09xx xxx xxx" required>
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- GPS Status Card -->
+                    <div class="gps-stat-card">
+                        <div id="gpsIcon" class="gps-icon icon-searching">
+                            <i class="fas fa-location-arrow"></i>
+                        </div>
+                        <div class="is-flex-grow-1">
+                            <div class="gps-text-title">Tình trạng vị trí</div>
+                            <div id="gpsText" class="gps-text-status stat-searching">Đang kiểm tra...</div>
+                        </div>
+                        <button type="button" class="button is-ghost is-small" onclick="requestGPS()">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-attendance" disabled>
+                        XÁC NHẬN ĐIỂM DANH
+                    </button>
+                    
+                    <button type="button" class="button is-fullwidth is-ghost is-small mt-3" onclick="closeModal()">
+                        Hủy bỏ
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/config.js"></script>
+
+    <script>
+        let events = [];
+        let selectedEvent = null;
+        let userPos = null;
+        let gpsWatchId = null;
+
+        const loadingScreen = document.getElementById('loadingScreen');
+        const emptyScreen = document.getElementById('emptyScreen');
+        const mainContent = document.getElementById('mainContent');
+        const eventList = document.getElementById('eventList');
+        const checkInModal = document.getElementById('checkInModal');
+
+        // Logic Initialization
+        async function fetchEvents() {
+            try {
+                const snapshot = await db.ref('sinhhoatdoan/events').once('value');
+                const data = snapshot.val();
+                
+                if (!data) {
+                    loadingScreen.classList.add('is-hidden');
+                    emptyScreen.classList.remove('is-hidden');
+                    return;
+                }
+
+                events = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+                events.sort((a, b) => b.startTime - a.startTime);
+                
+                renderList();
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi tải dữ liệu. Vui lòng thử lại.");
+            }
+        }
+
+        function renderList() {
+            eventList.innerHTML = '';
+            
+            const now = Date.now();
+            const openEvents = events.filter(e => e.isOpen && (!e.endTime || now < e.endTime) && (e.startTime && now >= e.startTime));
+            const upcomingEvents = events.filter(e => e.isOpen && (e.startTime && now < e.startTime));
+            const closedEvents = events.filter(e => !e.isOpen || (e.endTime && now >= e.endTime));
+
+            // 1. Render Open Events
+            if (openEvents.length > 0) {
+                const title = document.createElement('div');
+                title.className = 'section-title animate-up';
+                title.innerHTML = '🔥 Đang diễn ra';
+                eventList.appendChild(title);
+
+                openEvents.forEach(item => {
+                    const dateStr = new Date(item.startTime).toLocaleDateString('vi-VN');
+                    const card = document.createElement('div');
+                    card.className = 'event-item is-open animate-up';
+                    card.onclick = () => openModal(item.id);
+
+                    card.innerHTML = `
+                        <div class="event-content">
+                            <div class="event-status-pill pill-open">
+                                <i class="fas fa-bolt"></i> Đang mở điểm danh
+                            </div>
+                            <div class="event-title">${item.name}</div>
+                            <div class="event-meta-list">
+                                <div class="meta-item" style="flex-direction: column; align-items: flex-start;">
+                                    <div><i class="fas fa-info-circle"></i> <b class="mr-1">Lưu ý:</b></div>
+                                    <div class="mt-1" style="width: 100%;">
+                                        <div class="desc-content preserve-newline" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem;">${item.description || 'Không có mô tả'}</div>
+                                        ${item.description && item.description.length > 60 ? `
+                                            <a href="javascript:void(0)" class="has-text-link is-size-7 mt-1" onclick="event.stopPropagation(); const s = this.previousElementSibling.style; if(s.display === '-webkit-box') { s.display = 'block'; this.innerText = 'Thu gọn'; } else { s.display = '-webkit-box'; this.innerText = 'Xem thêm'; }">Xem thêm</a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="meta-item"><i class="far fa-calendar-check"></i> <b>Ngày:</b> ${dateStr}</div>
+                                ${item.endTime ? `
+                                    <div class="meta-item has-text-danger"><i class="fas fa-clock"></i> <b>Kết thúc:</b> ${new Date(item.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} ngày ${new Date(item.endTime).toLocaleDateString('vi-VN')}</div>
+                                ` : ''}
+                                <div class="meta-item"><i class="fas fa-location-arrow"></i> <b>Bán kính:</b> ${item.radius}m</div>
+                                <div class="meta-item">
+                                    <a href="https://www.google.com/maps?q=${item.location.lat},${item.location.lng}" target="_blank" class="has-text-link is-size-7">
+                                        <i class="fas fa-map-marked-alt"></i> Xem bản đồ
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="btn-checkin">
+                                <span>Bắt đầu Điểm danh</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    `;
+                    eventList.appendChild(card);
+                });
+            }
+
+            // 1.5 Render Upcoming Events
+            if (upcomingEvents.length > 0) {
+                const title = document.createElement('div');
+                title.className = 'section-title animate-up mt-5';
+                title.innerHTML = '📅 Sắp diễn ra';
+                eventList.appendChild(title);
+
+                upcomingEvents.forEach(item => {
+                    const dateStr = new Date(item.startTime).toLocaleDateString('vi-VN');
+                    const timeStr = new Date(item.startTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                    const card = document.createElement('div');
+                    card.className = 'event-item is-closed animate-up'; 
+                    card.style.opacity = "0.9";
+                    
+                    card.innerHTML = `
+                        <div class="event-content">
+                            <div class="event-status-pill pill-closed" style="background: rgba(255, 171, 0, 0.1); color: #ffab00;">
+                                <i class="fas fa-clock"></i> Chờ bắt đầu
+                            </div>
+                            <div class="event-title">${item.name}</div>
+                            <div class="event-meta-list">
+                                <div class="meta-item"><i class="fas fa-play"></i> <b>Bắt đầu lúc:</b> ${timeStr} - ${dateStr}</div>
+                                <div class="meta-item" style="flex-direction: column; align-items: flex-start;">
+                                    <div><i class="fas fa-info-circle"></i> <b class="mr-1">Lưu ý:</b></div>
+                                    <div class="mt-1" style="width: 100%;">
+                                        <div class="desc-content preserve-newline" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem;">${item.description || 'Không có mô tả'}</div>
+                                        ${item.description && item.description.length > 60 ? `
+                                            <a href="javascript:void(0)" class="has-text-link is-size-7 mt-1" onclick="event.stopPropagation(); const s = this.previousElementSibling.style; if(s.display === '-webkit-box') { s.display = 'block'; this.innerText = 'Thu gọn'; } else { s.display = '-webkit-box'; this.innerText = 'Xem thêm'; }">Xem thêm</a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="closed-notice">Nút điểm danh sẽ tự động xuất hiện khi đến giờ sinh hoạt</div>
+                        </div>
+                    `;
+                    eventList.appendChild(card);
+                });
+            }
+
+            // 2. Render Closed Events
+            if (closedEvents.length > 0) {
+                const title = document.createElement('div');
+                title.className = 'section-title animate-up mt-5';
+                title.innerHTML = '🕒 Đã kết thúc';
+                eventList.appendChild(title);
+
+                closedEvents.forEach(item => {
+                    const dateStr = new Date(item.startTime).toLocaleDateString('vi-VN');
+                    const card = document.createElement('div');
+                    card.className = 'event-item is-closed animate-up';
+                    
+                    card.innerHTML = `
+                        <div class="event-content">
+                            <div class="event-status-pill pill-closed">
+                                <i class="fas fa-lock"></i> Đã đóng
+                            </div>
+                            <div class="event-title">${item.name}</div>
+                            <div class="event-meta-list">
+                                <div class="meta-item" style="flex-direction: column; align-items: flex-start;">
+                                    <div><i class="fas fa-info-circle"></i> <b class="mr-1">Mô tả:</b></div>
+                                    <div class="mt-1" style="width: 100%;">
+                                        <div class="desc-content preserve-newline" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem;">${item.description || '...'}</div>
+                                        ${item.description && item.description.length > 60 ? `
+                                            <a href="javascript:void(0)" class="has-text-link is-size-7 mt-1" onclick="event.stopPropagation(); const s = this.previousElementSibling.style; if(s.display === '-webkit-box') { s.display = 'block'; this.innerText = 'Thu gọn'; } else { s.display = '-webkit-box'; this.innerText = 'Xem thêm'; }">Xem thêm</a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="meta-item"><i class="far fa-calendar"></i> ${dateStr}</div>
+                            </div>
+                            <div class="closed-notice">
+                                ${ (item.endTime && now >= item.endTime) ? 
+                                    `Hệ thống đã tự động đóng lúc ${new Date(item.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}` : 
+                                    'Buổi sinh hoạt này đã dừng tiếp nhận điểm danh' 
+                                }
+                            </div>
+                        </div>
+                    `;
+                    eventList.appendChild(card);
+                });
+            }
+
+            loadingScreen.classList.add('is-hidden');
+            mainContent.classList.remove('is-hidden');
+        }
+
+        // GPS Logic
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const toRad = p => p * Math.PI / 180;
+            const R = 6371e3; // metres
+            const φ1 = toRad(lat1), φ2 = toRad(lat2);
+            const Δφ = toRad(lat2-lat1), Δλ = toRad(lon2-lon1);
+            const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function updateGPSUI(status, distance = 0, accuracy = 0) {
+            const icon = document.getElementById('gpsIcon');
+            const text = document.getElementById('gpsText');
+            const btn = document.getElementById('submitBtn');
+
+            icon.className = 'gps-icon';
+            text.className = 'gps-text-status';
+
+            if (status === 'searching') {
+                icon.classList.add('icon-searching');
+                text.classList.add('stat-searching');
+                text.innerHTML = 'Đang dò vị trí...';
+                btn.disabled = true;
+            } else if (status === 'ok') {
+                icon.className = 'gps-icon icon-ok';
+                text.className = 'gps-text-status stat-ok';
+                text.innerHTML = `Hợp lệ (Cách ${Math.round(distance)}m) <br><small class="has-text-grey">Sai số: ${Math.round(accuracy)}m</small>`;
+                btn.disabled = false;
+            } else if (status === 'far') {
+                icon.className = 'gps-icon icon-error';
+                text.className = 'gps-text-status stat-error';
+                text.innerHTML = `Quá xa (${Math.round(distance)}m > ${selectedEvent.radius}m) <br><small class="has-text-grey">Sai số: ${Math.round(accuracy)}m</small>`;
+                btn.disabled = true;
+            } else if (status === 'denied') {
+                icon.className = 'gps-icon icon-error';
+                text.className = 'gps-text-status stat-error';
+                text.innerHTML = 'Quyền vị trí bị từ chối! Hãy bật lại trong cài đặt trình duyệt.';
+                btn.disabled = true;
+            } else {
+                icon.className = 'gps-icon icon-error';
+                text.className = 'gps-text-status stat-error';
+                text.innerHTML = 'Lỗi định vị. Hãy bật GPS và 4G!';
+                btn.disabled = true;
+            }
+        }
+
+        function requestGPS() {
+            if (!navigator.geolocation) return updateGPSUI('error');
+
+            updateGPSUI('searching');
+            
+            if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+
+            const options = { 
+                enableHighAccuracy: true, 
+                timeout: 15000, 
+                maximumAge: 0 
+            };
+
+            // Get initial position quickly
+            navigator.geolocation.getCurrentPosition(pos => {
+                handleGPSUpdate(pos);
+            }, err => console.warn("Initial GPS failed:", err), options);
+
+            // Then watch for better ones
+            gpsWatchId = navigator.geolocation.watchPosition(pos => {
+                handleGPSUpdate(pos);
+            }, err => {
+                console.warn(err);
+                if (err.code === 1) {
+                    updateGPSUI('denied');
+                } else if (!userPos) {
+                    updateGPSUI('error');
+                }
+            }, options);
+        }
+
+        function handleGPSUpdate(pos) {
+            userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            const accuracy = pos.coords.accuracy;
+            
+            if (selectedEvent && selectedEvent.location) {
+                const dist = getDistance(userPos.lat, userPos.lng, selectedEvent.location.lat, selectedEvent.location.lng);
+                if (dist <= selectedEvent.radius) updateGPSUI('ok', dist, accuracy);
+                else updateGPSUI('far', dist, accuracy);
+            }
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            selectedEvent = events.find(e => e.id === id);
+            const mapUrl = `https://www.google.com/maps?q=${selectedEvent.location.lat},${selectedEvent.location.lng}`;
+            
+            document.getElementById('modalName').textContent = selectedEvent.name;
+            document.getElementById('modalTime').innerHTML = `
+                <div class="tags is-centered mb-2">
+                    <span class="tag is-info is-light">
+                        <i class="fas fa-play mr-1"></i> Bắt đầu: ${new Date(selectedEvent.startTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    ${selectedEvent.endTime ? `
+                    <span class="tag is-danger is-light">
+                        <i class="fas fa-stop mr-1"></i> Kết thúc: ${new Date(selectedEvent.endTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                    </span>
+                    ` : ''}
+                </div>
+                <div class="mb-3">
+                    <a href="${mapUrl}" target="_blank" class="button is-small is-link is-light is-rounded">
+                        <i class="fas fa-directions mr-1"></i> Xem trên bản đồ
+                    </a>
+                </div>
+                <p class="has-text-grey-darker preserve-newline is-size-7"><i>${selectedEvent.description || ''}</i></p>
+            `;
+            
+            checkInModal.classList.add('is-active');
+            requestGPS();
+        }
+
+        function closeModal() {
+            checkInModal.classList.remove('is-active');
+            if (gpsWatchId) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+                gpsWatchId = null;
+            }
+        }
+
+        // Submit Logic
+        document.getElementById('attendanceForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('userPhone').value.trim();
+            const btn = document.getElementById('submitBtn');
+            
+            btn.classList.add('is-loading');
+            
+            try {
+                // Check if member exists
+                const memSnap = await db.ref('sinhhoatdoan/members').orderByChild('phone').equalTo(phone).once('value');
+                if (!memSnap.exists()) throw new Error("Thành viên chưa đăng ký SĐT này!");
+                
+                const memKey = Object.keys(memSnap.val())[0];
+                const member = memSnap.val()[memKey];
+
+                // IP Check
+                let ip = 'unknown';
+                try {
+                    const r = await fetch('https://api.ipify.org?format=json');
+                    const j = await r.json();
+                    ip = j.ip.replace(/\./g, '_');
+                } catch(e) {}
+
+                const ipRef = db.ref(`sinhhoatdoan/event_ips/${selectedEvent.id}/${ip}`);
+                const ipSnap = await ipRef.once('value');
+                if (ipSnap.exists() && ipSnap.val().uid !== memKey) {
+                    throw new Error(`Mỗi thiết bị chỉ được điểm danh 1 lần cho 1 người!`);
+                }
+
+                // Duplicate Check
+                const attRef = db.ref(`sinhhoatdoan/attendance/${selectedEvent.id}/${memKey}`);
+                const attSnap = await attRef.once('value');
+                if (attSnap.exists()) throw new Error("Bạn đã điểm danh buổi này rồi!");
+
+                // Save
+                await attRef.set({
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    memberName: member.fullName,
+                    location: userPos,
+                    ip: ip,
+                    status: 'present'
+                });
+
+                await ipRef.set({ uid: memKey, name: member.fullName });
+
+                // Update stars
+                await db.ref(`sinhhoatdoan/members/${memKey}`).update({
+                    stars: (member.stars || 0) + 1
+                });
+
+                alert(`🎉 Điểm danh thành công! Bạn nhận được thêm 1 sao vàng.`);
+                closeModal();
+                location.reload();
+
+            } catch (err) {
+                alert("❌ Lỗi: " + err.message);
+            } finally {
+                btn.classList.remove('is-loading');
+            }
+        };
+
+        // Start
+        fetchEvents();
+    </script>
+</body>
+</html>

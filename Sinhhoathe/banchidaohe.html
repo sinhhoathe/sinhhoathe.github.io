@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ban chỉ đạo hè - Quản lý danh sách</title>
+    <link rel="stylesheet" href="/Sinhhoathe/main.css" />
+    <style>
+      body {
+        background: #f7f8fc;
+      }
+      .container {
+        max-width: 980px;
+      }
+      .card {
+        border-radius: 14px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+      }
+      .login-box {
+        max-width: 420px;
+        margin: 60px auto;
+      }
+      .table th,
+      .table td {
+        vertical-align: middle;
+      }
+    </style>
+    <link rel="icon" href="/assets/images/ballbang_favicon.png" />
+  </head>
+  <body>
+    <section class="section">
+      <div class="container">
+        <h1 class="title is-3 has-text-centered" style="margin-bottom: 1.5rem">
+          KHU DÂN CƯ
+        </h1>
+
+        <div
+          class="notification is-info is-light"
+          style="max-width: 800px; margin: 0 auto 2rem auto"
+        >
+          <strong>📌 Quy trình thực hiện:</strong>
+          <ol style="margin-top: 0.5rem; margin-left: 1.5rem">
+            <li>
+              <strong>Bước 1:</strong> Đăng nhập theo ID/mật khẩu do Đoàn phường
+              cấp.
+            </li>
+            <li>
+              <strong>Bước 2:</strong> Kiểm tra danh sách thiếu nhi đã đăng ký
+              (Bổ sung thêm nếu thiếu).
+            </li>
+            <li>
+              <strong>Bước 3:</strong> Xếp loại sinh hoạt hè cho từng thiếu nhi
+              (Lựa chọn A, B, C, D).
+            </li>
+            <li>
+              <strong>Bước 4:</strong> Nhấn nút "Lưu cập nhật" để hoàn tất. Hệ
+              thống tự động gửi kết quả xếp loại về Đoàn phường. Hạn cập nhật
+              xếp loại
+              <strong style="color: red">xong trước ngày 30/9/2026</strong>
+            </li>
+          </ol>
+        </div>
+
+        <div id="loginView" class="card login-box">
+          <div class="card-content">
+            <h2 class="title is-5">Đăng nhập</h2>
+            <div class="field">
+              <label class="label">Tên đăng nhập</label>
+              <div class="control">
+                <input
+                  id="loginId"
+                  class="input"
+                  type="text"
+                  placeholder="Liên hệ Đoàn phường Lào Cai để nhận ID và Pass"
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Mật khẩu</label>
+              <div class="control">
+                <input
+                  id="loginPass"
+                  class="input"
+                  type="password"
+                  placeholder="•••"
+                />
+              </div>
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <button id="btnLogin" class="button is-primary">
+                  Đăng nhập
+                </button>
+              </div>
+              <div class="control">
+                <a href="/Sinhhoathe/dangky.html" class="button is-light"
+                  >Trang đăng ký</a
+                >
+              </div>
+            </div>
+            <p id="loginErr" class="help is-danger" style="display: none">
+              Sai thông tin đăng nhập.
+            </p>
+          </div>
+        </div>
+
+        <div id="adminView" style="display: none">
+          <div class="card">
+            <div class="card-content">
+              <div class="level">
+                <div class="level-left">
+                  <h2 class="title is-5">
+                    Danh sách của <span id="currentHamlet"></span>
+                    <span
+                      id="countBadge"
+                      class="tag is-info is-light"
+                      style="margin-left: 8px"
+                      >0/0</span
+                    >
+                  </h2>
+                </div>
+                <div class="level-right">
+                  <button id="btnLogout" class="button is-light">
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
+
+              <div class="box">
+                <h3 class="title is-6">Thêm nhanh người đăng ký</h3>
+                <div class="columns is-multiline">
+                  <div class="column is-4">
+                    <input
+                      id="qa_fullName"
+                      class="input"
+                      placeholder="HỌ TÊN (IN HOA)"
+                    />
+                  </div>
+                  <div class="column is-2">
+                    <input
+                      id="qa_birthYear"
+                      class="input"
+                      inputmode="numeric"
+                      placeholder="Năm sinh"
+                    />
+                  </div>
+                  <div class="column is-3">
+                    <div class="select is-fullwidth">
+                      <select id="qa_school">
+                        <option value="">-- Chọn trường --</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="column is-3">
+                    <input
+                      id="qa_parentName"
+                      class="input"
+                      placeholder="HỌ TÊN PH (IN HOA)"
+                    />
+                  </div>
+                  <div class="column is-3">
+                    <input
+                      id="qa_parentPhone"
+                      class="input"
+                      inputmode="numeric"
+                      placeholder="SĐT PH"
+                    />
+                  </div>
+                  <div class="column is-3">
+                    <button
+                      id="btnQuickAdd"
+                      class="button is-primary is-fullwidth"
+                    >
+                      Thêm vào danh sách
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Họ và tên</th>
+                      <th>Năm sinh</th>
+                      <th>Trường</th>
+                      <th>Địa chỉ</th>
+                      <th>Phụ huynh</th>
+                      <th>Điện thoại PH</th>
+                      <th>Xếp loại</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblBody"></tbody>
+                </table>
+              </div>
+
+              <div class="field is-grouped">
+                <div class="control">
+                  <button id="btnSave" class="button is-primary">
+                    Lưu cập nhật
+                  </button>
+                </div>
+                <div class="control">
+                  <button id="btnReload" class="button is-light">
+                    Tải lại
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="/Sinhhoathe/firebase.config.js"></script>
+
+    <script>
+      // DOM refs
+      const loginView = document.getElementById("loginView");
+      const adminView = document.getElementById("adminView");
+      const loginId = document.getElementById("loginId");
+      const loginPass = document.getElementById("loginPass");
+      const loginErr = document.getElementById("loginErr");
+      const currentHamlet = document.getElementById("currentHamlet");
+      const tblBody = document.getElementById("tblBody");
+      const qa_fullName = document.getElementById("qa_fullName");
+      const qa_birthYear = document.getElementById("qa_birthYear");
+      const qa_school = document.getElementById("qa_school");
+      const qa_parentName = document.getElementById("qa_parentName");
+      const qa_parentPhone = document.getElementById("qa_parentPhone");
+      const countBadge = document.getElementById("countBadge");
+
+      // State
+      let SESSION = { hamlet: null };
+      let PASSWORDS = {};
+      let META = { schools: [], wards: [], hamlets: {} };
+      let REG_CACHE = [];
+
+      // Helpers
+      const hasFirebase = () =>
+        window.firebase && window.firebase.apps && window.firebase.apps.length;
+      const norm = (s) => (s || "").trim().toLowerCase();
+
+      // Subscribe passwords
+      function subscribePasswords() {
+        if (!hasFirebase()) return;
+        const ref = firebase.database().ref("Sinhhoathe/Passwords");
+        ref.off();
+        ref.on("value", (s) => {
+          PASSWORDS = s.val() || {};
+        });
+      }
+      // Subscribe meta to fill school options and resolve ward
+      function subscribeMeta() {
+        if (!hasFirebase()) return;
+        const ref = firebase.database().ref("Sinhhoathe/Meta");
+        ref.off();
+        ref.on("value", (s) => {
+          META = s.val() || { schools: [], wards: [], hamlets: {} };
+          renderSchools();
+        });
+      }
+      function renderSchools() {
+        qa_school.innerHTML = '<option value="">-- Chọn trường --</option>';
+        (META.schools || []).forEach((s) => {
+          const o = document.createElement("option");
+          o.value = s;
+          o.textContent = "Trường " + s;
+          qa_school.appendChild(o);
+        });
+      }
+
+      // Subscribe registrations
+      function subscribeRegistrations() {
+        if (!hasFirebase()) return;
+        const ref = firebase.database().ref("Sinhhoathe/Registrations");
+        ref.off();
+        ref.on("value", (snap) => {
+          const raw = snap.val();
+          const arr = [];
+          if (raw && typeof raw === "object") {
+            Object.keys(raw).forEach((k) => {
+              arr.push({ _key: k, ...(raw[k] || {}) });
+            });
+          }
+          REG_CACHE = arr;
+          renderTable();
+        });
+      }
+
+      function resolvePasswordById(id, source) {
+        if (!source) return null;
+        for (const k in source) {
+          const v = source[k];
+          if (v && typeof v === "object") {
+            if (
+              (v.id || "").trim().toLowerCase() ===
+              (id || "").trim().toLowerCase()
+            ) {
+              return {
+                key: k,
+                password: v.password || "",
+                wardName: v.wardName || "",
+                hamletName: v.hamletName || k,
+              };
+            }
+          } else {
+            // Legacy support for plain string passwords or old structure
+            if (id === k)
+              return { key: k, password: v || "", hamletName: k, wardName: "" };
+          }
+        }
+        return null;
+      }
+
+      // Login
+      document.getElementById("btnLogin").addEventListener("click", () => {
+        const id = (loginId.value || "").trim();
+        const pass = (loginPass.value || "").trim();
+        const cred = resolvePasswordById(id, PASSWORDS);
+
+        if (!id || !cred || !cred.password || pass !== cred.password) {
+          loginErr.style.display = "";
+          return;
+        }
+
+        loginErr.style.display = "none";
+
+        // Set SESSION
+        SESSION.hamlet = cred.hamletName; // Tên hiển thị (VD: Tổ 1)
+        SESSION.ward = cred.wardName || ""; // Tên phường (VD: P. Cốc Lếu)
+
+        // Fallback tìm Ward nếu chưa có wardName (cho data cũ)
+        if (!SESSION.ward) {
+          for (const w of META.wards || []) {
+            const arr = (META.hamlets && META.hamlets[w]) || [];
+            if (arr.includes(SESSION.hamlet)) {
+              SESSION.ward = w;
+              break;
+            }
+          }
+        }
+
+        currentHamlet.textContent =
+          SESSION.hamlet + (SESSION.ward ? ` (${SESSION.ward})` : "");
+        loginView.style.display = "none";
+        adminView.style.display = "";
+        renderTable();
+      });
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        SESSION.hamlet = null;
+        adminView.style.display = "none";
+        loginView.style.display = "";
+        loginId.value = "";
+        loginPass.value = "";
+      });
+
+      // Render table for current hamlet
+      function renderTable() {
+        if (!SESSION.hamlet) {
+          tblBody.innerHTML = "";
+          countBadge.textContent = "0/0";
+          return;
+        }
+        const data = REG_CACHE.filter(
+          (x) =>
+            norm(x.hamlet) === norm(SESSION.hamlet) &&
+            (!SESSION.ward || norm(x.ward) === norm(SESSION.ward))
+        );
+        tblBody.innerHTML = "";
+        const total = data.length;
+        let i = 1;
+        if (!total) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 7;
+          td.className = "has-text-centered has-text-grey";
+          td.textContent = "Không có dữ liệu";
+          tr.appendChild(td);
+          tblBody.appendChild(tr);
+          countBadge.textContent = "0/0";
+          return;
+        }
+        data.forEach((item, idx) => {
+          if (!["A", "B", "C", "D", ""].includes(item.grade)) item.grade = "";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${i++}</td><td>${item.fullName || ""}</td><td>${
+            item.birthYear || ""
+          }</td><td>${item.school || ""}</td><td>
+          <strong>${
+            item.hamlet || ""
+          }</strong><br><span class="is-size-7 has-text-grey">${
+            item.ward || ""
+          }</span>
+          </td><td>${item.parentName || ""}</td><td>${
+            item.parentPhone || ""
+          }</td><td><div class="select is-small"><select data-role="grade"><option value="" ${
+            item.grade === "" ? "selected" : ""
+          }>--</option><option value="A" ${
+            item.grade === "A" ? "selected" : ""
+          }>A</option><option value="B" ${
+            item.grade === "B" ? "selected" : ""
+          }>B</option><option value="C" ${
+            item.grade === "C" ? "selected" : ""
+          }>C</option><option value="D" ${
+            item.grade === "D" ? "selected" : ""
+          }>D</option></select></div></td>`;
+          tr.dataset.key = item._key || "";
+          tblBody.appendChild(tr);
+        });
+        countBadge.textContent = `${total}/${total}`;
+      }
+      document
+        .getElementById("btnReload")
+        .addEventListener("click", renderTable);
+
+      // Quick Add
+      const toUpper = (el) =>
+        el &&
+        el.addEventListener("input", () => (el.value = el.value.toUpperCase()));
+      toUpper(qa_fullName);
+      toUpper(qa_parentName);
+      const digitsOnly = (el) =>
+        el &&
+        el.addEventListener(
+          "input",
+          () => (el.value = el.value.replace(/\D+/g, ""))
+        );
+      digitsOnly(qa_birthYear);
+      digitsOnly(qa_parentPhone);
+      document.getElementById("btnQuickAdd").addEventListener("click", () => {
+        if (!SESSION.hamlet) return alert("Chưa đăng nhập");
+
+        const payload = {
+          fullName: (qa_fullName.value || "").trim(),
+          birthYear: (qa_birthYear.value || "").trim(),
+          school: qa_school.value,
+          ward: SESSION.ward || "",
+          hamlet: SESSION.hamlet,
+          parentName: (qa_parentName.value || "").trim(),
+          parentPhone: (qa_parentPhone.value || "").trim(),
+          grade: "",
+          savedAt: Date.now(),
+        };
+        if (
+          !payload.fullName ||
+          !/^\d{4}$/.test(payload.birthYear) ||
+          !payload.school
+        )
+          return alert("Nhập HỌ TÊN (IN HOA), năm sinh 4 số và chọn trường.");
+        if (!hasFirebase())
+          return alert("Hệ thống chưa sẵn sàng. Vui lòng thử lại.");
+        firebase
+          .database()
+          .ref("registrations")
+          .push(payload)
+          .then(() => {
+            qa_fullName.value = "";
+            qa_birthYear.value = "";
+            qa_school.value = "";
+            qa_parentName.value = "";
+            qa_parentPhone.value = "";
+            alert("Đã thêm.");
+          })
+          .catch(() => alert("Không thể thêm thông tin. Vui lòng thử lại."));
+      });
+
+      // Save grades
+      document.getElementById("btnSave").addEventListener("click", () => {
+        if (!SESSION.hamlet) return;
+        if (!hasFirebase())
+          return alert("Hệ thống chưa sẵn sàng. Vui lòng thử lại.");
+        const updates = [];
+        Array.from(tblBody.querySelectorAll("tr")).forEach((tr) => {
+          const key = tr.dataset.key;
+          if (!key) return;
+          const sel = tr.querySelector('select[data-role="grade"]');
+          const val = (sel && sel.value) || "";
+          updates.push(
+            firebase
+              .database()
+              .ref("Sinhhoathe/Registrations")
+              .child(key)
+              .child("grade")
+              .set(val)
+          );
+        });
+        Promise.all(updates)
+          .then(() => alert("Đã lưu cập nhật."))
+          .catch(() => alert("Không thể lưu cập nhật."));
+      });
+
+      // Init
+      subscribePasswords();
+      subscribeMeta();
+      subscribeRegistrations();
+    </script>
+  </body>
+</html>
