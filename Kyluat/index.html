@@ -436,10 +436,6 @@
                     <input type="text" id="filterName" placeholder="Tìm tên/lớp..." style="width: 200px; padding: 10px; border-radius: 12px; background: #1e293b; border: 1px solid var(--glass-border); color: white;" oninput="applyFilters()">
                     <select id="filterType" style="padding: 10px; border-radius: 12px; background: #1e293b; border: 1px solid var(--glass-border); color: white;" onchange="applyFilters()">
                         <option value="">Tất cả loại hình</option>
-                        <option value="Đi học muộn">Đi học muộn</option>
-                        <option value="Không mũ bảo hiểm">Không mũ bảo hiểm</option>
-                        <option value="Xe không gương">Xe không gương</option>
-                        <option value="Khen thưởng">Khen thưởng 👍</option>
                     </select>
                 </div>
             </div>
@@ -525,7 +521,11 @@
             rootRef.child('Settings').on('value', snap => {
                 const data = snap.val() || {};
                 systemConfig = data.Config || systemConfig;
+                // Update Admin List logic
                 admin1List = data.Admin1List || {};
+
+                // Update Filter Options Dynamically
+                populateFilterOptions(data.ViolationTypes || {}, data.RewardTypes || {});
 
                 const today = new Date().toISOString().split('T')[0];
                 const isExpired = systemConfig.expiryDate && today > systemConfig.expiryDate;
@@ -546,6 +546,42 @@
                     }
                 }
             });
+        }
+        
+        function populateFilterOptions(vTypes, rTypes) {
+            const select = document.getElementById('filterType');
+            // Keep the first default option
+            select.innerHTML = '<option value="">Tất cả loại hình</option>';
+            
+            // Add Violation Types (Grouped if possible, but simple list for now)
+            if (Object.keys(vTypes).length > 0) {
+                const grp = document.createElement('optgroup');
+                grp.label = "⚠️ Lỗi Vi Phạm";
+                Object.values(vTypes).forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.textContent = v.name;
+                    grp.appendChild(opt);
+                });
+                select.appendChild(grp);
+            }
+
+            // Add Reward Types
+            if (Object.keys(rTypes).length > 0) {
+                const grp = document.createElement('optgroup');
+                grp.label = "✨ Khen Thưởng";
+                Object.values(rTypes).forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.name;
+                    opt.textContent = r.name;
+                    grp.appendChild(opt);
+                });
+                const generalReward = document.createElement('option');
+                generalReward.value = "Khen thưởng";
+                generalReward.textContent = "Khen thưởng (Chung)";
+                grp.appendChild(generalReward);
+                select.appendChild(grp);
+            }
         }
         checkSystemStatus();
 
@@ -733,7 +769,7 @@
                 card.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
                         <div class="rank-number">${rank}</div>
-                        <img src="${s.photo}" style="width:40px; height:40px; border-radius:10px; object-fit:cover;">
+                        <img src="${s.photo}" style="width:40px; height:40px; border-radius:10px; object-fit:cover; cursor:zoom-in;" onclick="showImg('${s.photo}')">
                         <div style="min-width:0;">
                             <div style="font-weight:700; font-size:1rem;">${s.name}</div>
                             <div style="font-size:0.8rem; color:#94a3b8;">MSHS: ${s.id} | Lớp ${s.class || 'N/A'}</div>
