@@ -1,0 +1,49 @@
+name: Obfuscate and Deploy
+on:
+  push:
+    branches:
+      - main # Kiểm tra kỹ nếu nhánh của bạn là 'master' thì sửa lại nhé
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Obfuscator
+        run: npm install -g javascript-obfuscator
+
+      - name: Prepare dist folder
+        run: mkdir -p dist
+
+      - name: Obfuscate JS files
+        # Lệnh này sẽ quét toàn bộ và tạo bản mã hóa vào dist
+        run: |
+          javascript-obfuscator ./ --output ./dist --compact true --self-defending true --string-array true --string-array-encoding 'base64'
+
+      - name: Copy static files
+        # Dùng dấu ngoặc kép "" để bao quanh tên thư mục có khoảng trắng
+        run: |
+          cp index.html ./dist/ || true
+          cp CNAME ./dist/ || true
+          cp -r "Diem danh" ./dist/ || true
+          cp -r "Kyluat" ./dist/ || true
+          cp -r "Sinhhoatdoan" ./dist/ || true
+          cp -r "Sinhhoathe" ./dist/ || true
+
+      - name: Clean up original JS in dist
+        # Chỉ giữ lại các file JS đã được làm rối, xóa file JS gốc nếu lỡ bị copy đè
+        run: |
+          find ./dist -name "*.js" -not -path "*/dist/*"
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
