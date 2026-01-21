@@ -90,25 +90,11 @@
 
                 <div style="border-top: 1px solid var(--glass-border); padding-top: 20px;">
                     <p style="margin-bottom: 15px; font-weight: 600;">Chọn các lỗi vi phạm:</p>
-                    <div class="violation-options">
-                        <div class="v-item" onclick="toggleV(this)">
-                            <input type="checkbox" value="Đi học muộn">
-                            <span>Đi học muộn</span>
-                        </div>
-                        <div class="v-item" onclick="toggleV(this)">
-                            <input type="checkbox" value="Không mũ bảo hiểm">
-                            <span>Không mũ bảo hiểm</span>
-                        </div>
-                        <div class="v-item" onclick="toggleV(this)">
-                            <input type="checkbox" value="Xe không gương">
-                            <span>Xe không gương</span>
-                        </div>
-                        <div class="v-item" onclick="toggleV(this)">
-                            <input type="checkbox" value="Đánh nhau">
-                            <span>Đánh nhau</span>
-                        </div>
+                    <div class="violation-options" id="violationOptionsContainer">
+                        <!-- Dynamic Options -->
                     </div>
-                    <textarea id="otherViolation" placeholder="Vi phạm nội quy khác (ghi chi tiết tại đây)..."></textarea>
+                    
+                    <textarea id="violationNote" placeholder="Ghi chú chi tiết thêm (nếu có)..." style="margin-top: 15px; min-height: 80px;"></textarea>
                     
                     <button class="btn btn-danger" onclick="submitViolation()">Xác Nhận Vi Phạm</button>
                 </div>
@@ -134,8 +120,10 @@
         }
 
         // System Control Check
-        rootRef.child('Settings/Config').on('value', snap => {
-            const config = snap.val() || { status: 'active' };
+        let violationTypesConf = {};
+
+        rootRef.child('Settings').on('value', snap => {
+            const config = snap.val() && snap.val().Config || { status: 'active' };
             const today = new Date().toISOString().split('T')[0];
             const isExpired = config.expiryDate && today > config.expiryDate;
             const isLocked = config.status === 'locked';
@@ -144,7 +132,33 @@
                 alert(config.message || "Hệ thống đã bị khóa hoặc hết hạn!");
                 window.location.href = 'index.html';
             }
+
+            // Load Types
+            violationTypesConf = (snap.val() && snap.val().ViolationTypes) || {};
+            renderViolationOptions();
         });
+
+        function renderViolationOptions() {
+            const container = document.getElementById('violationOptionsContainer');
+            container.innerHTML = '';
+            
+            if (Object.keys(violationTypesConf).length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; grid-column:span 2;">Chưa có danh mục lỗi nào được cấu hình.</p>';
+                return;
+            }
+
+            Object.entries(violationTypesConf).forEach(([key, val]) => {
+                const div = document.createElement('div');
+                div.className = 'v-item';
+                div.onclick = function() { toggleV(this) };
+                div.dataset.points = val.points; // Store points
+                div.innerHTML = `
+                    <input type="checkbox" value="${val.name}">
+                    <span>${val.name} <small style="color:#f87171">(-${val.points})</small></span>
+                `;
+                container.appendChild(div);
+            });
+        }
 
         // Photo Modal functions
         function showImg(src) {
@@ -162,13 +176,12 @@
         let currentStudent = null;
 
         async function searchStudent() {
-            // ... (rest of searchStudent function) ...
             const id = document.getElementById('searchId').value.trim().toUpperCase();
             if(!id) return;
 
             const snap = await rootRef.child('Students').child(id).once('value');
             if (snap.exists()) {
-                currentStudent = snap.val();
+                currentStudent = { studentId: id, ...snap.val() }; // Ensure ID is present
                 document.getElementById('resImg').src = currentStudent.photo;
                 document.getElementById('resName').textContent = currentStudent.name;
                 document.getElementById('resInfo').textContent = `Lớp: ${currentStudent.class} | Ngày sinh: ${formatDate(currentStudent.dob)}`;
@@ -176,6 +189,7 @@
                 document.getElementById('studentResult').style.display = 'block';
                 document.getElementById('noMatch').style.display = 'none';
             } else {
+                currentStudent = null;
                 document.getElementById('studentResult').style.display = 'none';
                 document.getElementById('noMatch').style.display = 'block';
             }
@@ -188,21 +202,28 @@
         }
 
         async function submitViolation() {
-            const checked = document.querySelectorAll('.v-item.active input');
-            const types = Array.from(checked).map(i => i.value);
-            const other = document.getElementById('otherViolation').value.trim();
-            
-            if (other) {
-                // Tách các lỗi trong ô 'Khác' bằng dấu phẩy để tính điểm chính xác
-                other.split(',').forEach(t => {
-                    const cleanT = t.trim();
-                    if (cleanT) types.push(cleanT);
-                });
-            }
+            if (!currentStudent) return;
+
+            const activeItems = document.querySelectorAll('.v-item.active');
+            const types = [];
+            let totalDeduction = 0;
+
+            activeItems.forEach(el => {
+                const cb = el.querySelector('input');
+                types.push(cb.value);
+                totalDeduction += parseInt(el.dataset.points) || 1;
+            });
 
             if (types.length === 0) {
                 alert('Vui lòng chọn ít nhất 1 lỗi vi phạm!');
                 return;
+            }
+
+            // check for note
+            const note = document.getElementById('violationNote').value.trim();
+            let violationString = types.join(', ');
+            if (note) {
+                violationString += ` (Chi tiết: ${note})`;
             }
 
             const violationData = {
@@ -210,25 +231,28 @@
                 studentName: currentStudent.name,
                 studentClass: currentStudent.class,
                 studentPhoto: currentStudent.photo,
-                violationType: types.join(', '),
+                violationType: violationString,
+                totalPoints: totalDeduction,
                 timestamp: Date.now(),
                 recordedBy: sessionStorage.getItem('kyluat_id')
             };
 
             await rootRef.child('Violations').push(violationData);
             
-            // Deduct exactly 1 star per violation record/time
+            // Deduct stars
             const studentRef = rootRef.child('Students').child(currentStudent.studentId);
             await studentRef.transaction(current => {
                 if (current) {
-                    current.stars = (current.stars || 0) - 1;
+                    current.stars = (current.stars || 0) - totalDeduction;
                 }
                 return current;
             });
 
-            alert(`Đã ghi nhận vi phạm và trừ 1 sao thành công!`);
+            alert(`Đã ghi nhận vi phạm và trừ ${totalDeduction} sao!`);
             location.reload();
         }
+
+
 
         function formatDate(d) {
             const date = new Date(d);

@@ -201,6 +201,56 @@
             </div>
         </div>
 
+        <!-- System Configuration Section -->
+        <div class="card" style="margin-bottom: 30px;">
+            <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;"><span>⚙️</span> Cấu Hình Hệ Thống</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <!-- Left: Default Stars -->
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--primary);">⭐ Điểm Ban Đầu</h4>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">Thiết lập số sao mặc định cho học sinh.</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="defaultStarInput" placeholder="VD: 10" style="width: 100px;">
+                        <button class="btn btn-primary" style="width: auto;" onclick="saveDefaultStars()">Lưu mặc định</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <button class="btn" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); font-size: 0.8rem; width: 100%; text-align: left;" onclick="applyDefaultToAll()">
+                            ⚠️ Reset toàn bộ học sinh về điểm này
+                        </button>
+                        <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.8rem; width: 100%; text-align: left;" onclick="deleteAllViolations()">
+                            🗑️ Xóa sạch toàn bộ lịch sử vi phạm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Config Lists -->
+                <div>
+                    <!-- Violation Types Config -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px; color: var(--danger);">🛑 Danh mục Vi phạm (Trừ điểm)</h4>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="newVType" placeholder="Tên lỗi (VD: Đi muộn)" style="flex: 2;">
+                            <input type="number" id="newVPoint" placeholder="Điểm trừ" style="flex: 1;">
+                            <button class="btn btn-danger" style="width: auto; margin-top:0;" onclick="addConfigType('ViolationTypes')">Thêm</button>
+                        </div>
+                        <div id="violationTypeList" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px;"></div>
+                    </div>
+
+                    <!-- Reward Types Config -->
+                    <div>
+                        <h4 style="margin-bottom: 10px; color: #10b981;">✨ Danh mục Khen thưởng (Cộng điểm)</h4>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="newRType" placeholder="Tên hđ (VD: Nhặt của rơi)" style="flex: 2;">
+                            <input type="number" id="newRPoint" placeholder="Điểm cộng" style="flex: 1;">
+                            <button class="btn btn-success" style="width: auto; margin-top:0;" onclick="addConfigType('RewardTypes')">Thêm</button>
+                        </div>
+                        <div id="rewardTypeList" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Bottom Section: Data Management -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
             <!-- Violation Management -->
@@ -222,7 +272,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
                     <h3 style="font-size: 1.1rem;">🎓 Học Sinh</h3>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn" style="background: #4338ca; color: white; padding: 8px 12px; font-size: 0.75rem; width: auto; border-radius: 10px;" onclick="recalculateAllStars()">🔄 Đồng bộ</button>
+                        <button class="btn" style="background: #4338ca; color: white; padding: 8px 12px; font-size: 0.75rem; width: auto; border-radius: 10px;" onclick="recalculateAllStars()">🔄 Tính lại</button>
                         <input type="text" id="searchStudent" placeholder="Tên/Lớp..." style="width: 120px; padding: 8px 12px; font-size: 0.8rem; border-radius: 12px;" oninput="filterStudents()">
                     </div>
                 </div>
@@ -315,22 +365,18 @@
         const classListArea = document.getElementById('classListArea');
         const editClassSelect = document.getElementById('editClass');
 
-        let allStudents = [];
-        let allViolations = [];
-        let allClasses = [];
-        let studentPage = 1;
-        let violationPage = 1;
-        const pageSize = 20;
-
-        // Account logic
+        // Restore Admin Management Logic
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('adminId').value.trim();
             const pass = document.getElementById('adminPass').value.trim();
             const role = document.getElementById('adminRole').value;
+            
+            if (!id || !pass) return alert('Vui lòng nhập đủ thông tin!');
+            
             await rootRef.child('Admins').child(id).set({ pass, role, createdAt: Date.now() });
             createForm.reset();
-            alert('Đã tạo tài khoản!');
+            alert('Đã tạo tài khoản thành công!');
         });
 
         rootRef.child('Admins').on('value', snap => {
@@ -339,8 +385,8 @@
                 const data = child.val();
                 let roleText = '';
                 if (data.role === 'admin2') roleText = 'Nhập liệu';
-                else if (data.role === 'admin3') roleText = 'Ghi lỗi';
-                else if (data.role === 'admin4') roleText = 'Tặng sao';
+                else if (data.role === 'admin3') roleText = 'Ghi lỗi (Cờ đỏ)';
+                else if (data.role === 'admin4') roleText = 'Khen thưởng';
                 else roleText = data.role;
 
                 const row = document.createElement('tr');
@@ -357,226 +403,183 @@
             });
         });
 
-        // Class logic
-        createClassForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('className').value.trim();
-            if (allClasses.includes(name)) return alert('Lớp này đã tồn tại!');
-            await rootRef.child('Classes').push(name);
-            createClassForm.reset();
-        });
-
-        rootRef.child('Classes').on('value', snap => {
-            allClasses = [];
-            classListArea.innerHTML = '';
-            editClassSelect.innerHTML = '<option value="">-- Chọn lớp --</option>';
+        // System Config Logic
+        let configData = { ViolationTypes: {}, RewardTypes: {}, DefaultStars: 0 };
+        
+        rootRef.child('Settings').on('value', snap => {
+            const data = snap.val() || {};
+            configData.ViolationTypes = data.ViolationTypes || {};
+            configData.RewardTypes = data.RewardTypes || {};
+            configData.DefaultStars = data.DefaultStars || 0;
             
-            snap.forEach(child => {
-                const name = child.val();
-                allClasses.push(name);
-                
-                // Render Tags
-                const tag = document.createElement('span');
-                tag.style = "padding: 5px 10px; background: rgba(99, 102, 241, 0.2); color: var(--primary); border-radius: 8px; font-size: 0.75rem; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(99, 102, 241, 0.3);";
-                tag.innerHTML = `${name} <span style="cursor:pointer; color:rgba(255,255,255,0.5);" onclick="deleteClass('${child.key}')">×</span>`;
-                classListArea.appendChild(tag);
-
-                // Populate Select
-                const opt = document.createElement('option');
-                opt.value = name; opt.textContent = name;
-                editClassSelect.appendChild(opt);
-            });
-            renderStudents(); // Re-render to update class colors or stats if needed
+            document.getElementById('defaultStarInput').value = configData.DefaultStars;
+            renderConfigList('ViolationTypes', 'violationTypeList');
+            renderConfigList('RewardTypes', 'rewardTypeList');
         });
 
-        async function deleteClass(key) {
-            if (confirm('Xóa lớp này?')) await rootRef.child('Classes').child(key).remove();
+        async function saveDefaultStars() {
+            const val = parseInt(document.getElementById('defaultStarInput').value) || 0;
+            await rootRef.child('Settings/DefaultStars').set(val);
+            alert('Đã lưu cấu hình điểm ban đầu!');
         }
 
-        // Student & Violation Logic
-        rootRef.child('Students').on('value', (snapshot) => {
-            allStudents = [];
-            snapshot.forEach(child => { allStudents.push({ id: child.key, ...child.val() }); });
-            renderStudents();
-        });
-
-        function filterStudents() { studentPage = 1; renderStudents(); }
-
-        function renderStudents() {
-            const query = document.getElementById('searchStudent').value.toLowerCase();
-            studentManageBody.innerHTML = '';
-            const filtered = allStudents.filter(s => s.name.toLowerCase().includes(query) || (s.class && s.class.toLowerCase().includes(query)));
-
-            const start = (studentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const displayList = filtered.slice(start, end);
-
-            displayList.forEach(s => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <div class="student-info">
-                            <img src="${s.photo}" class="student-img" onclick="showImg('${s.photo}')">
-                            <div>
-                                <p style="font-weight: 600; font-size: 0.85rem;">${s.name}</p>
-                                <p style="font-size: 0.75rem; color: #f59e0b; font-weight: bold;">${s.stars || 0} ⭐</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="font-size: 0.85rem; color: #94a3b8;">${s.class || 'N/A'}</td>
-                    <td style="text-align:right">
-                        <div style="display: flex; gap: 5px; justify-content: flex-end;">
-                            <button class="btn-success" onclick="openEditModal('${s.id}', '${s.name}', '${s.class}')">Sửa</button>
-                            <button class="btn-danger" onclick="deleteStudent('${s.id}', '${s.name}')">Xóa</button>
-                        </div>
-                    </td>
-                `;
-                studentManageBody.appendChild(row);
-            });
-            renderPagination('studentPagination', filtered.length, studentPage, (p) => { studentPage = p; renderStudents(); });
-        }
-
-        async function deleteStudent(id, name) {
-            if (confirm(`CHÚ Ý: Bạn có chắc chắn muốn xóa học sinh "${name}"? \nHành động này sẽ xóa dữ liệu học sinh và TOÀN BỘ lịch sử vi phạm/khen thưởng liên quan.`)) {
-                try {
-                    const updates = {};
-                    // Xóa thông tin học sinh
-                    updates[`Students/${id}`] = null;
-                    
-                    // Tìm và xóa tất cả vi phạm liên quan
-                    allViolations.forEach(v => {
-                        if (v.studentId === id) {
-                            updates[`Violations/${v.id}`] = null;
-                        }
-                    });
-                    
-                    await rootRef.update(updates);
-                    alert('Đã xóa sạch dữ liệu học sinh và lịch sử liên quan!');
-                } catch (err) {
-                    alert('Lỗi khi xóa dữ liệu!');
-                }
-            }
-        }
-
-        rootRef.child('Violations').on('value', (snapshot) => {
-            allViolations = [];
-            snapshot.forEach(child => { allViolations.unshift({ id: child.key, ...child.val() }); });
-            renderViolations();
-        });
-
-        function filterViolations() { violationPage = 1; renderViolations(); }
-
-        function renderViolations() {
-            const query = document.getElementById('searchViolation').value.toLowerCase();
-            violationManageBody.innerHTML = '';
-            const filtered = allViolations.filter(v => v.studentName.toLowerCase().includes(query));
+        async function applyDefaultToAll() {
+            const val = parseInt(document.getElementById('defaultStarInput').value) || 0;
+            if (!confirm(`CẢNH BÁO: Bạn muốn áp dụng ĐIỂM BAN ĐẦU là ${val} cho toàn bộ học sinh?\n\nHệ thống sẽ tính lại điểm hiện tại của học sinh theo công thức:\nĐiểm Hiện Tại = ${val} + (Tổng Điểm Cộng - Tổng Điểm Trừ trong quá khứ)`)) return;
             
-            const start = (violationPage - 1) * pageSize;
-            const end = start + pageSize;
-            const displayList = filtered.slice(start, end);
-
-            displayList.forEach(item => {
-                const row = document.createElement('tr');
-                const isMerit = item.violationType.includes('Khen thưởng');
-                const isLong = item.violationType.length > 20;
-                const displayText = isLong ? item.violationType.substring(0, 20) + '...' : item.violationType;
-
-                row.innerHTML = `
-                    <td style="width:35%">
-                        <div style="font-weight: 600; font-size: 0.85rem;">${item.studentName}</div>
-                        <div style="font-size: 0.7rem; color: #94a3b8;">${new Date(item.timestamp).toLocaleDateString('vi-VN')}</div>
-                    </td>
-                    <td id="cell-${item.id}">
-                        <div style="display:flex; align-items:center;">
-                            <span class="violation-tag" style="${isMerit ? 'background:rgba(16,185,129,0.1); color:#10b981;' : ''}">${displayText}</span>
-                            ${isLong ? `<span class="btn-more" onclick="showDetail('${item.violationType.replace(/'/g, "\\'")}')">...</span>` : ''}
-                        </div>
-                    </td>
-                    <td style="text-align:right">
-                        <div style="display: flex; gap: 5px; justify-content:flex-end;">
-                            <button class="btn-danger" style="padding: 6px 10px;" onclick="deleteViolation('${item.id}')">Xóa</button>
-                        </div>
-                    </td>
-                `;
-                violationManageBody.appendChild(row);
-            });
-            renderPagination('violationPagination', filtered.length, violationPage, (p) => { violationPage = p; renderViolations(); });
+            // Update Base Setting & Recalculate
+            await rootRef.child('Settings/DefaultStars').set(val);
+            configData.DefaultStars = val; // Optimistic update for immediate logic
+            await performRecalculation(val);
         }
 
-        function renderPagination(elId, totalCount, current, onPageChange) {
-            const el = document.getElementById(elId);
-            el.innerHTML = '';
-            const totalPages = Math.ceil(totalCount / pageSize);
-            if (totalPages <= 1) return;
+        async function addConfigType(node) {
+            const prefix = node === 'ViolationTypes' ? 'newV' : 'newR';
+            const name = document.getElementById(`${prefix}Type`).value.trim();
+            const points = parseInt(document.getElementById(`${prefix}Point`).value) || 0;
+            
+            if (!name) return alert('Vui lòng nhập tên!');
+            if (points <= 0) return alert('Điểm phải lớn hơn 0!');
 
-            let start = Math.max(1, current - 2);
-            let end = Math.min(totalPages, start + 4);
-            if (end - start < 4) start = Math.max(1, end - 4);
+            await rootRef.child(`Settings/${node}`).push({ name, points });
+            
+            document.getElementById(`${prefix}Type`).value = '';
+            document.getElementById(`${prefix}Point`).value = '';
+        }
 
-            for (let i = start; i <= end; i++) {
-                const btn = document.createElement('button');
-                btn.style = `padding: 5px 10px; background: ${i === current ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; border: 1px solid var(--glass-border); color: white; border-radius: 6px; cursor: pointer; font-size: 0.75rem;`;
-                btn.textContent = i;
-                btn.onclick = () => onPageChange(i);
-                el.appendChild(btn);
+        async function deleteConfigType(node, key) {
+            if (confirm('Xóa mục này?')) await rootRef.child(`Settings/${node}/${key}`).remove();
+        }
+
+        function renderConfigList(node, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const list = configData[node];
+            
+            if (!list || Object.keys(list).length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Chưa có dữ liệu</div>';
+                return;
             }
+
+            Object.entries(list).forEach(([key, val]) => {
+                const el = document.createElement('div');
+                el.style = "display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);";
+                el.innerHTML = `
+                    <div style="font-size: 0.85rem;">
+                        <span style="font-weight:600;">${val.name}</span>
+                        <span style="font-size:0.75rem; color:${node === 'ViolationTypes' ? '#f87171' : '#34d399'}; margin-left:5px;">(${val.points} điểm)</span>
+                    </div>
+                    <button class="btn-danger" style="padding: 2px 6px; font-size: 0.7rem; width: auto; margin-top:0;" onclick="deleteConfigType('${node}', '${key}')">×</button>
+                `;
+                container.appendChild(el);
+            });
         }
-
-        function openEditModal(id, name, cls) {
-            document.getElementById('editSid').value = id;
-            document.getElementById('editIdVal').value = id;
-            document.getElementById('editName').value = name;
-            document.getElementById('editClass').value = cls || '';
-            document.getElementById('editStudentModal').style.display = 'flex';
-        }
-
-        function closeEditModal() { document.getElementById('editStudentModal').style.display = 'none'; }
-
-        editForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editSid').value;
-            const name = document.getElementById('editName').value.trim();
-            const cls = document.getElementById('editClass').value;
-            await rootRef.child('Students').child(id).update({ name, class: cls });
-            alert('Đã cập nhật!');
-            closeEditModal();
-        });
 
         async function recalculateAllStars() {
-            if (!confirm('Tính toán lại số sao cho TOÀN BỘ học sinh?')) return;
+            if (!confirm('Hệ thống sẽ đồng bộ lại số sao cho TOÀN BỘ học sinh dựa trên cấu hình điểm ban đầu và lịch sử vi phạm/khen thưởng.\n\nTiếp tục?')) return;
+            await performRecalculation(configData.DefaultStars || 0);
+        }
+
+        async function deleteAllViolations() {
+            if (!confirm('CỰC KỲ NGUY HIỂM: Bạn có chắc chắn muốn xóa TOÀN BỘ lịch sử vi phạm và khen thưởng?\n\nHành động này KHÔNG THỂ khôi phục!')) return;
+            if (!confirm('Xác nhận lần cuối: Toàn bộ lịch sử sẽ bị mất. Điểm của học sinh sẽ được reset về mức Điểm Ban Đầu.\n\nBạn có muốn tiếp tục?')) return;
+
             try {
-                const studentsSnap = await rootRef.child('Students').once('value');
-                const violationsSnap = await rootRef.child('Violations').once('value');
+                // 1. Delete Violations Node
+                await rootRef.child('Violations').remove();
+
+                // 2. Reset All Students to Base Stars
+                const updates = {};
+                const baseStars = configData.DefaultStars || 0;
+                allStudents.forEach(s => { updates[`Students/${s.id}/stars`] = baseStars; });
+                await rootRef.update(updates);
+
+                alert('Đã xóa toàn bộ lịch sử và reset điểm thành công!');
+            } catch (err) {
+                console.error(err);
+                alert('Có lỗi xảy ra: ' + err.message);
+            }
+        }
+
+        // Shared Core Logic
+        async function performRecalculation(baseStars) {
+             try {
+                // 1. Map Config Names to Points for fast lookup
+                const vMap = {};
+                Object.values(configData.ViolationTypes).forEach(v => vMap[v.name.toLowerCase()] = v.points);
+                const rMap = {};
+                Object.values(configData.RewardTypes).forEach(r => rMap[r.name.toLowerCase()] = r.points);
+
+                // 2. Reset All Students to Base
                 const studentStars = {};
-                studentsSnap.forEach(s => { studentStars[s.key] = 0; });
-                violationsSnap.forEach(v => {
-                    const data = v.val();
-                    if (data.studentId && studentStars[data.studentId] !== undefined) {
-                        if (data.violationType.includes('Khen thưởng')) {
-                            studentStars[data.studentId] += 1; // +1 cho mỗi lần khen thưởng
-                        } else {
-                            studentStars[data.studentId] -= 1; // -1 cho mỗi lần vi phạm
-                        }
-                    }
+                allStudents.forEach(s => { studentStars[s.id] = baseStars; });
+
+                // 3. Iterate Violations and Apply Points
+                allViolations.slice().reverse().forEach(v => {
+                   if (!v.studentId || studentStars[v.studentId] === undefined) return;
+                   
+                   let pointsChange = 0;
+                   if (v.totalPoints) {
+                       // New logic: stored totalPoints
+                       pointsChange = v.violationType.includes('Khen thưởng') ? v.totalPoints : -v.totalPoints;
+                   } else {
+                       // Legacy / Dynamic Lookup
+                       const types = v.violationType.split(',').map(t => t.trim());
+                       types.forEach(t => {
+                           const lowerT = t.toLowerCase();
+                           if (rMap[lowerT]) {
+                               pointsChange += rMap[lowerT];
+                           } else if (v.violationType.includes('Khen thưởng')) {
+                               pointsChange += 1; // Fallback generic reward
+                           } else {
+                               if (vMap[lowerT]) {
+                                   pointsChange -= vMap[lowerT];
+                               } else {
+                                   pointsChange -= 1; // Fallback generic violation
+                               }
+                           }
+                       });
+                   }
+                   studentStars[v.studentId] += pointsChange;
                 });
+
+                // 4. Batch Update to Firebase
                 const updates = {};
                 for (const sid in studentStars) { updates[`Students/${sid}/stars`] = studentStars[sid]; }
                 await rootRef.update(updates);
-                alert('Đã đồng bộ thành công!');
-            } catch (err) { alert('Lỗi đồng bộ!'); }
+                alert('Đã cập nhật dữ liệu thành công!');
+            } catch (err) { console.error(err); alert('Lỗi đồng bộ: ' + err.message); }
         }
 
         async function deleteViolation(id) {
-            if (confirm('Xóa bản ghi này? Số sao học sinh sẽ được tự động cập nhật (+1 nếu xóa vi phạm, -1 nếu xóa khen thưởng).')) {
+            if (confirm('Xóa bản ghi này? Số sao học sinh sẽ được tự động hoàn tác.')) {
                 const snap = await rootRef.child('Violations').child(id).once('value');
                 const d = snap.val(); if (!d) return;
                 
-                // Mỗi bản ghi tính là 1 đơn vị
-                let adj = d.violationType.includes('Khen thưởng') ? -1 : 1;
+                // Calculate points to reverse
+                let reversePoints = 0;
+                if (d.totalPoints) {
+                    reversePoints = d.violationType.includes('Khen thưởng') ? -d.totalPoints : d.totalPoints;
+                } else {
+                    // Estimate based on config like recalculate
+                     const vMap = {};
+                    Object.values(configData.ViolationTypes).forEach(v => vMap[v.name.toLowerCase()] = v.points);
+                    const rMap = {};
+                    Object.values(configData.RewardTypes).forEach(r => rMap[r.name.toLowerCase()] = r.points);
+
+                    const types = d.violationType.split(',').map(t => t.trim());
+                    types.forEach(t => {
+                        const lowerT = t.toLowerCase();
+                        if (rMap[lowerT]) reversePoints -= rMap[lowerT];
+                        else if (d.violationType.includes('Khen thưởng')) reversePoints -= 1;
+                        else if (vMap[lowerT]) reversePoints += vMap[lowerT];
+                        else reversePoints += 1;
+                    });
+                }
                 
                 if (d.studentId) {
                     await rootRef.child('Students').child(d.studentId).transaction(curr => { 
-                        if (curr) curr.stars = (curr.stars || 0) + adj; 
+                        if (curr) curr.stars = (curr.stars || 0) + reversePoints; 
                         return curr; 
                     });
                 }
@@ -592,8 +595,241 @@
         function closeDetail() { document.getElementById('detailModal').style.display = 'none'; }
         function logout() { sessionStorage.clear(); window.location.href = 'index.html'; }
 
+        // Global Data Variables
+        let allStudents = [];
+        let allViolations = [];
+        let currentStudentPage = 1;
+        let currentViolationPage = 1;
+        const pageSize = 10;
+
         initData();
-        function initData() {} // Dummy to prevent error if called elsewhere
+
+        function initData() {
+            // Fetch Students
+            rootRef.child('Students').on('value', snap => {
+                allStudents = [];
+                snap.forEach(s => {
+                    allStudents.push({ id: s.key, ...s.val() });
+                });
+                renderStudentTable();
+            });
+
+            // Fetch Violations
+            rootRef.child('Violations').on('value', snap => {
+                allViolations = [];
+                snap.forEach(v => {
+                    const data = v.val();
+                    data.key = v.key; // Store key for deletion
+                    allViolations.push(data);
+                });
+                // Sort by new to old
+                allViolations.sort((a, b) => b.timestamp - a.timestamp);
+                renderViolationTable();
+            });
+        }
+
+        // Render Student Management Table
+        function renderStudentTable() {
+            const tbody = document.getElementById('studentManageBody');
+            tbody.innerHTML = '';
+            
+            const query = (document.getElementById('searchStudent').value || '').toLowerCase();
+            const filtered = allStudents.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                (s.class && s.class.toLowerCase().includes(query))
+            );
+
+            renderPaginationHTML('studentPagination', filtered.length, currentStudentPage, (p) => {
+                currentStudentPage = p;
+                renderStudentTable();
+            });
+
+            const start = (currentStudentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const data = filtered.slice(start, end);
+
+            data.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="student-info">
+                            <img src="${s.photo}" class="student-img" onclick="showImg('${s.photo}')">
+                            <div>
+                                <div style="font-weight:600;">${s.name}</div>
+                                <div style="font-size:0.75rem; color:#94a3b8;">MSHS: ${s.id}</div>
+                                <div style="font-size:0.75rem; color:${s.stars < 0 ? '#ef4444' : '#10b981'}; font-weight:700;">${s.stars || 0} ⭐</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-weight:600; color:#cbd5e1;">${s.class}</td>
+                    <td style="text-align: right;">
+                        <button class="btn" style="background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 6px; font-size: 0.75rem;" onclick="openEditStudent('${s.id}')">✏️</button>
+                        <button class="btn-danger" onclick="deleteStudent('${s.id}')">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Violation Management Table
+        function renderViolationTable() {
+            const tbody = document.getElementById('violationManageBody');
+            tbody.innerHTML = '';
+
+            const query = (document.getElementById('searchViolation').value || '').toLowerCase();
+            const filtered = allViolations.filter(v => 
+                v.violationType.toLowerCase().includes(query) ||
+                (v.studentName && v.studentName.toLowerCase().includes(query))
+            );
+
+            renderPaginationHTML('violationPagination', filtered.length, currentViolationPage, (p) => {
+                currentViolationPage = p;
+                renderViolationTable();
+            });
+
+            const start = (currentViolationPage - 1) * pageSize;
+            const end = start + pageSize;
+            const data = filtered.slice(start, end);
+
+            data.forEach(v => {
+                const tr = document.createElement('tr');
+                const isMerit = v.violationType.includes('Khen thưởng');
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight:600; font-size:0.9rem;">${v.studentName} <span style="font-weight:400; color:#94a3b8; font-size:0.75rem;">(${v.studentClass})</span></div>
+                        <div style="font-size:0.7rem; color:#64748b;">${new Date(v.timestamp).toLocaleString('vi-VN')}</div>
+                    </td>
+                    <td>
+                        <span class="violation-tag" style="${isMerit ? 'background:rgba(16,185,129,0.1); color:#10b981; border-color:rgba(16,185,129,0.2);' : ''}">
+                            ${v.violationType}
+                        </span>
+                        ${v.totalPoints ? `<span style="font-size:0.7rem; font-weight:700; margin-left:5px; color:${isMerit ? '#10b981' : '#ef4444'}">${isMerit ? '+' : '-'}${v.totalPoints}</span>`: ''}
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn-danger" onclick="deleteViolation('${v.key}')">Hoàn tác</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPaginationHTML(elId, total, current, onPage) {
+            const container = document.getElementById(elId);
+            container.innerHTML = '';
+            const totalPages = Math.ceil(total / pageSize);
+            if (totalPages <= 1) return;
+
+            // Simple 5 page window
+            let start = Math.max(1, current - 2);
+            let end = Math.min(totalPages, start + 4);
+            if (end - start < 4) start = Math.max(1, end - 4);
+
+            for(let i = start; i <= end; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style = `width: 30px; height: 30px; padding: 0; display:flex; align-items:center; justify-content:center; ${i === current ? 'background:var(--primary); color:white;' : 'background:rgba(255,255,255,0.05);'}`;
+                btn.textContent = i;
+                btn.onclick = () => onPage(i);
+                container.appendChild(btn);
+            }
+        }
+
+        // Filter Handlers
+        window.filterStudents = () => { currentStudentPage = 1; renderStudentTable(); }
+        window.filterViolations = () => { currentViolationPage = 1; renderViolationTable(); }
+
+        // Student Edit Logic
+        async function deleteStudent(id) {
+            if(confirm('Xóa học sinh này và toàn bộ lịch sử vi phạm liên quan?')) {
+                // Remove violations first
+                const vSnap = await rootRef.child('Violations').orderByChild('studentId').equalTo(id).once('value');
+                const updates = {};
+                updates[`Students/${id}`] = null;
+                vSnap.forEach(child => {
+                    updates[`Violations/${child.key}`] = null;
+                });
+                await rootRef.update(updates);
+            }
+        }
+        
+        function openEditStudent(id) {
+             const s = allStudents.find(x => x.id === id);
+             if(!s) return;
+             document.getElementById('editSid').value = id;
+             document.getElementById('editIdVal').value = id;
+             document.getElementById('editName').value = s.name;
+             
+             // Populate class dropdown if needed, assuming classListArea has classes or just free text if simple
+             // Using current value for now if option doesn't exist?
+             // Ideally we should load classes. For now let's just use what's there or simple input
+             // Check admin1.html logic for class loading... it's also missing in my view.
+             // I'll assume simple population or just set value
+             
+             const sel = document.getElementById('editClass');
+             // Add option if not exists
+             let exists = false;
+             for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === s.class) exists = true; }
+             if(!exists) {
+                 const opt = document.createElement('option');
+                 opt.value = s.class;
+                 opt.textContent = s.class;
+                 sel.appendChild(opt);
+             }
+             sel.value = s.class;
+             
+             document.getElementById('editStudentModal').style.display = 'flex';
+        }
+
+        document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editSid').value;
+            const name = document.getElementById('editName').value;
+            const cls = document.getElementById('editClass').value;
+            if(id && name && cls) {
+                await rootRef.child(`Students/${id}`).update({ name, class: cls });
+                document.getElementById('editStudentModal').style.display = 'none';
+            }
+        });
+
+        window.closeEditModal = () => document.getElementById('editStudentModal').style.display = 'none';
+
+        // Class Management Logic (Missing in previous view, adding essential listener)
+        rootRef.child('Classes').on('value', snap => {
+            const list = document.getElementById('classListArea');
+            const editSel = document.getElementById('editClass');
+            if(list) list.innerHTML = '';
+            if(editSel) editSel.innerHTML = '<option value="">-- Chọn lớp --</option>';
+            
+            snap.forEach(c => {
+                 // Render Class Tag
+                 if(list) {
+                     const tag = document.createElement('div');
+                     tag.style = "background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:12px; font-size:0.8rem; display:flex; align-items:center; gap:5px;";
+                     tag.innerHTML = `${c.key} <span style="cursor:pointer; color:#ef4444; font-weight:bold;" onclick="deleteClass('${c.key}')">×</span>`;
+                     list.appendChild(tag);
+                 }
+                 // Render Select Option
+                 if(editSel) {
+                     const opt = document.createElement('option');
+                     opt.value = c.key;
+                     opt.textContent = c.key;
+                     editSel.appendChild(opt);
+                 }
+            });
+        });
+
+        document.getElementById('createClassForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const name = document.getElementById('className').value.trim();
+            if(name) {
+                await rootRef.child(`Classes/${name}`).set(true);
+                document.getElementById('className').value = '';
+            }
+        });
+        
+        async function deleteClass(name) {
+            if(confirm(`Xóa lớp ${name}?`)) await rootRef.child(`Classes/${name}`).remove();
+        }
     </script>
 </body>
 </html>

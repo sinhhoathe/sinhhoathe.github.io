@@ -84,8 +84,10 @@
                 </div>
 
                 <div style="border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                    <p style="font-weight: 600;">Ghi chú khen thưởng (+1 sao):</p>
-                    <textarea id="rewardNote" placeholder="Ví dụ: Tham gia trực nhật chuyên cần, Phát biểu hăng hái trên lớp, Nhặt được của rơi trả lại người mất..."></textarea>
+                    <p style="margin-bottom: 15px; font-weight: 600;">Chọn lý do khen thưởng:</p>
+                    <div id="rewardOptionsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;"></div>
+                    
+                    <textarea id="rewardNote" placeholder="Ghi chú chi tiết thêm (nếu có)..." style="margin-top: 15px; min-height: 80px;"></textarea>
                     
                     <button class="btn btn-success" onclick="submitReward()">Xác Nhận Tăng Sao</button>
                 </div>
@@ -110,8 +112,10 @@
         }
 
         // System Control Check
-        rootRef.child('Settings/Config').on('value', snap => {
-            const config = snap.val() || { status: 'active' };
+        let rewardTypesConf = {};
+
+        rootRef.child('Settings').on('value', snap => {
+            const config = snap.val() && snap.val().Config || { status: 'active' };
             const today = new Date().toISOString().split('T')[0];
             const isExpired = config.expiryDate && today > config.expiryDate;
             const isLocked = config.status === 'locked';
@@ -120,7 +124,40 @@
                 alert(config.message || "Hệ thống đã bị khóa hoặc hết hạn!");
                 window.location.href = 'index.html';
             }
+
+            // Load Rewards
+            rewardTypesConf = (snap.val() && snap.val().RewardTypes) || {};
+            renderRewardOptions();
         });
+
+        function renderRewardOptions() {
+            const container = document.getElementById('rewardOptionsContainer');
+            container.innerHTML = '';
+            
+            if (Object.keys(rewardTypesConf).length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; grid-column:span 2;">Chưa có danh mục khen thưởng nào.</p>';
+                return;
+            }
+
+            Object.entries(rewardTypesConf).forEach(([key, val]) => {
+                const div = document.createElement('div');
+                div.style = "background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s;";
+                div.onclick = function() { 
+                    const cb = this.querySelector('input');
+                    cb.checked = !cb.checked;
+                    this.style.background = cb.checked ? '#ffffff' : 'rgba(255,255,255,0.03)';
+                    this.style.color = cb.checked ? '#0f172a' : 'white';
+                    this.style.fontWeight = cb.checked ? '700' : 'normal';
+                };
+                div.className = 'r-item'; // Class marker
+                div.dataset.points = val.points;
+                div.innerHTML = `
+                    <input type="checkbox" value="${val.name}" style="pointer-events:none;">
+                    <span>${val.name} <small style="color:#10b981">(+${val.points})</small></span>
+                `;
+                container.appendChild(div);
+            });
+        }
 
         function showImg(src) {
             if(!src) return;
@@ -142,7 +179,7 @@
 
             const snap = await rootRef.child('Students').child(id).once('value');
             if (snap.exists()) {
-                currentStudent = snap.val();
+                currentStudent = { studentId: id, ...snap.val() };
                 document.getElementById('resImg').src = currentStudent.photo;
                 document.getElementById('resName').textContent = currentStudent.name;
                 document.getElementById('resInfo').textContent = `Lớp: ${currentStudent.class}`;
@@ -151,16 +188,35 @@
                 document.getElementById('studentResult').style.display = 'block';
                 document.getElementById('noMatch').style.display = 'none';
             } else {
+                currentStudent = null;
                 document.getElementById('studentResult').style.display = 'none';
                 document.getElementById('noMatch').style.display = 'block';
             }
         }
 
         async function submitReward() {
-            const note = document.getElementById('rewardNote').value.trim();
-            if (!note) {
-                alert('Vui lòng ghi lý do khen thưởng!');
+            if (!currentStudent) return;
+
+            const activeItems = document.querySelectorAll('.r-item input:checked');
+            const types = [];
+            let totalPoints = 0;
+
+            activeItems.forEach(cb => {
+                const parent = cb.closest('.r-item');
+                types.push(cb.value);
+                totalPoints += parseInt(parent.dataset.points) || 1;
+            });
+
+            if (types.length === 0) {
+                alert('Vui lòng chọn ít nhất 1 mục!');
                 return;
+            }
+
+            // Note Logic
+            const note = document.getElementById('rewardNote').value.trim();
+            let rewardString = '👍 Khen thưởng: ' + types.join(', ');
+            if (note) {
+                rewardString += ` (Chi tiết: ${note})`;
             }
 
             const rewardData = {
@@ -168,10 +224,10 @@
                 studentName: currentStudent.name,
                 studentClass: currentStudent.class,
                 studentPhoto: currentStudent.photo,
-                violationType: '👍 Khen thưởng: ' + note,
+                violationType: rewardString,
+                totalPoints: totalPoints,
                 timestamp: Date.now(),
-                recordedBy: sessionStorage.getItem('kyluat_id'),
-                type: 'merit'
+                recordedBy: sessionStorage.getItem('kyluat_id')
             };
 
             // Treat merit as a "violation" type for history but with positive connotation
@@ -181,12 +237,12 @@
             const studentRef = rootRef.child('Students').child(currentStudent.studentId);
             await studentRef.transaction(current => {
                 if (current) {
-                    current.stars = (current.stars || 0) + 1;
+                    current.stars = (current.stars || 0) + totalPoints;
                 }
                 return current;
             });
 
-            alert('Đã tặng 1 sao thành công!');
+            alert(`Đã tặng ${totalPoints} sao thành công!`);
             location.reload();
         }
 

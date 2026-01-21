@@ -210,12 +210,17 @@
                 return;
             }
 
+            // Fetch Default Stars first
+            const settingsSnap = await rootRef.child('Settings/DefaultStars').once('value');
+            const defaultStars = settingsSnap.val() || 0;
+
             const data = {
                 name: document.getElementById('name').value.trim(),
                 class: document.getElementById('class').value.trim(),
                 dob: document.getElementById('dob').value,
                 studentId: document.getElementById('studentId').value.trim().toUpperCase(),
                 photo: compressedBase64,
+                stars: defaultStars, // Set default stars
                 createdAt: Date.now()
             };
 
@@ -230,7 +235,7 @@
                 }
 
                 await rootRef.child('Students').child(data.studentId).set(data);
-                alert('Đã lưu dữ liệu học sinh thành công!');
+                alert(`Đã thêm học sinh thành công với ${defaultStars} điểm rèn luyện ban đầu!`);
                 studentForm.reset();
                 resetUpload();
             } catch (err) {
@@ -306,8 +311,8 @@
             if (snap.exists()) {
                 snap.forEach(child => {
                     const opt = document.createElement('option');
-                    opt.value = child.val();
-                    opt.textContent = child.val();
+                    opt.value = child.key;
+                    opt.textContent = child.key;
                     classSelect.appendChild(opt);
                 });
             } else {

@@ -749,22 +749,37 @@
         function renderClassLeaderboard() {
             classRankGrid.innerHTML = '';
             const classes = {};
+            const classCounts = {}; // Track number of students per class
+
+            // Calculate Sum and Count
             allStudents.forEach(s => {
-                classes[s.class] = (classes[s.class] || 0) + (s.stars || 0);
+                const cls = s.class;
+                if (!cls) return;
+                classes[cls] = (classes[cls] || 0) + (s.stars || 0);
+                classCounts[cls] = (classCounts[cls] || 0) + 1;
             });
 
-            const sortedClasses = Object.entries(classes).sort((a, b) => b[1] - a[1]);
-            sortedClasses.forEach(([name, stars], idx) => {
+            // Calculate Averages and convert to array for sorting
+            const classAvg = [];
+            for (const cls in classes) {
+                const avg = classes[cls] / classCounts[cls];
+                classAvg.push({ name: cls, avg: avg, total: classes[cls] });
+            }
+
+            // Sort by Average descending
+            classAvg.sort((a, b) => b.avg - a.avg);
+
+            classAvg.forEach((item, idx) => {
                 const card = document.createElement('div');
                 card.className = 'class-rank-card';
                 card.innerHTML = `
                     <div style="display:flex; align-items:center; gap:15px;">
                         <div class="rank-number" style="background:rgba(255,255,255,0.1)">${idx + 1}</div>
-                        <div style="font-size:1.1rem; font-weight:700;">Lớp ${name}</div>
+                        <div style="font-size:1.1rem; font-weight:700;">Lớp ${item.name}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:0.7rem; color:#94a3b8;">Tổng điểm sao</div>
-                        <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${stars} ⭐</div>
+                        <div style="font-size:0.7rem; color:#94a3b8;">Điểm trung bình</div>
+                        <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${item.avg.toFixed(2)} ⭐</div>
                     </div>
                 `;
                 classRankGrid.appendChild(card);
