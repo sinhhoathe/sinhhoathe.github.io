@@ -140,8 +140,8 @@
         const form = document.getElementById('createAccountForm');
         const userList = document.getElementById('userList');
 
-        // Load users
-        firebase.database().ref('users').on('value', (snapshot) => {
+        // Load users from CORRECT path
+        firebase.database().ref('Diemdanh/Users').on('value', (snapshot) => {
             const users = snapshot.val();
             userList.innerHTML = '';
             
@@ -167,7 +167,7 @@
                     <td>${statusHtml}</td>
                     <td>
                         <button class="button is-small is-danger" onclick="deleteUser('${username}')">
-                            🗑️ Xóa & Dọn dẹp
+                            🗑️ Xóa
                         </button>
                     </td>
                 `;
@@ -201,12 +201,12 @@
 
             try {
                 // Kiểm tra user tồn tại chưa
-                const snapshot = await firebase.database().ref(`users/${username}`).once('value');
+                const snapshot = await firebase.database().ref(`Diemdanh/Users/${username}`).once('value');
                 if (snapshot.exists() && !confirm('User này đã tồn tại. Bạn có muốn ghi đè (gia hạn) không?')) {
                     return;
                 }
 
-                await firebase.database().ref(`users/${username}`).set(userData);
+                await firebase.database().ref(`Diemdanh/Users/${username}`).set(userData);
                 alert(`✅ Đã cấp quyền cho [${username}] thành công!\nHết hạn: ${expiryDate.toLocaleDateString()}`);
                 form.reset();
             } catch (error) {
@@ -214,9 +214,9 @@
             }
         });
 
-        // Delete User and CLEANUP Data
+        // Delete User
         window.deleteUser = async function(username) {
-            if (!confirm(`⚠️ CẢNH BÁO CAO ĐỘ!\n\nBạn sắp xóa khách hàng [${username}].\n\nHành động này sẽ:\n1. Xóa tài khoản đăng nhập.\n2. XÓA TOÀN BỘ dữ liệu hội nghị và điểm danh của họ để giải phóng dung lượng.\n\nBạn chắc chắn chứ?`)) {
+            if (!confirm(`⚠️ CẢNH BÁO!\n\nBạn sắp xóa khách hàng [${username}].\n\nBạn chắc chắn chứ?`)) {
                 return;
             }
 
@@ -224,19 +224,13 @@
             const confirmPass = prompt("🔒 Để thực hiện xóa vĩnh viễn, vui lòng nhập mật khẩu Super Admin:");
             
             if (confirmPass !== SUPER_ADMIN_PASS) {
-                alert("⛔ Mật khẩu không đúng! Thao tác đã bị hủy để bảo vệ dữ liệu.");
+                alert("⛔ Mật khẩu không đúng!");
                 return;
             }
 
             try {
-                // Delete both paths concurrently for speed, but catch errors individually if needed
-                const updates = {};
-                updates[`users/${username}`] = null;
-                updates[`tenants/${username}`] = null;
-                
-                await firebase.database().ref().update(updates);
-
-                alert('✅ Đã xóa khách hàng và dọn dẹp sạch dữ liệu hội nghị/điểm danh!');
+                await firebase.database().ref(`Diemdanh/Users/${username}`).remove();
+                alert('✅ Đã xóa khách hàng!');
             } catch (error) {
                 console.error(error);
                 alert('Lỗi khi xóa: ' + error.message);
