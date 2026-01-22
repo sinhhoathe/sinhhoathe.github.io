@@ -126,6 +126,9 @@ function renderConferenceList() {
                             <button class="button is-warning is-small" onclick="copyLink('${conf.id}')">
                                 🔗 Link
                             </button>
+                            <button class="button is-dark is-small" onclick="showQrCode('${conf.id}')">
+                                📱 QR
+                            </button>
                             <button class="button is-danger is-small" onclick="deleteConference('${conf.id}')">
                                 🗑️
                             </button>
@@ -311,15 +314,58 @@ window.copyLink = function(conferenceId) {
     if (!conference) return;
 
     const baseUrl = window.location.origin + window.location.pathname.replace('btc-list.html', '');
-    // NEW LINK FORMAT: Single tenant, no 'u=' param needed
     const link = `${baseUrl}index.html?c=${conferenceId}`;
     
     navigator.clipboard.writeText(link).then(() => {
-        alert(`✓ Đã sao chép link điểm danh!\n\nLink: ${link}\nMã hội nghị: ${conference.code}`);
+        alert(`✓ Đã sao chép link điểm danh!\n\n${link}`);
     }).catch(() => {
         prompt('Sao chép link này:', link);
     });
 };
+
+// Show QR Code
+const qrModal = document.getElementById('qrModal');
+const closeQrModal = document.getElementById('closeQrModal');
+let qrCodeObj = null;
+
+window.showQrCode = function(conferenceId) {
+    const conference = allConferences.find(c => c.id === conferenceId);
+    if (!conference) return;
+
+    const baseUrl = window.location.origin + window.location.pathname.replace('btc-list.html', '');
+    const link = `${baseUrl}index.html?c=${conferenceId}`;
+
+    document.getElementById('qrConfName').textContent = conference.name;
+    document.getElementById('qrcode').innerHTML = ''; // Clear old QR
+
+    // Generate QR
+    qrCodeObj = new QRCode(document.getElementById("qrcode"), {
+        text: link,
+        width: 180,
+        height: 180,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+
+    qrModal.classList.add('is-active');
+};
+
+// Close QR Modal
+closeQrModal.addEventListener('click', () => {
+    qrModal.classList.remove('is-active');
+});
+
+// Download QR
+document.getElementById('downloadQr').addEventListener('click', () => {
+    const imgInfo = document.querySelector('#qrcode img');
+    if (imgInfo) {
+        const link = document.createElement('a');
+        link.href = imgInfo.src;
+        link.download = `QR_DiemDanh_${new Date().getTime()}.png`;
+        link.click();
+    }
+});
 
 // Delete conference
 window.deleteConference = async function(conferenceId) {
