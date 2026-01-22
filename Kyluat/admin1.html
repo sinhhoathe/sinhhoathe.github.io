@@ -410,8 +410,8 @@
                     </select>
                 </div>
                 <div style="margin-bottom: 25px;">
-                    <label style="font-size: 0.8rem; color: #94a3b8;">Mã số học sinh (MSHS)</label>
-                    <input type="text" id="editIdVal" disabled> 
+                    <label style="font-size: 0.8rem; color: #94a3b8;">Mã số học sinh (MSHS) - <span style="color:#ef4444; font-style:italic;">Cẩn trọng khi sửa</span></label>
+                    <input type="text" id="editIdVal"> 
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" class="btn btn-primary">Lưu</button>
@@ -868,13 +868,53 @@
 
         document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const id = document.getElementById('editSid').value;
-            const name = document.getElementById('editName').value;
+            const oldId = document.getElementById('editSid').value;
+            const newId = document.getElementById('editIdVal').value.trim();
+            const name = document.getElementById('editName').value.trim();
             const cls = document.getElementById('editClass').value;
-            if(id && name && cls) {
-                await rootRef.child(`Students/${id}`).update({ name, class: cls });
-                document.getElementById('editStudentModal').style.display = 'none';
+
+            if(!oldId || !newId || !name || !cls) return alert('Vui lòng nhập đủ thông tin!');
+
+            if (oldId === newId) {
+                // Simple update (No ID change)
+                await rootRef.child(`Students/${oldId}`).update({ name, class: cls });
+            } else {
+                // ID Change Logic (Complex migration)
+                const snap = await rootRef.child(`Students/${newId}`).once('value');
+                if (snap.exists()) {
+                    return alert('Mã học sinh mới đã tồn tại! Vui lòng chọn mã khác.');
+                }
+
+                if(!confirm(`⚠️ CẢNH BÁO THAY ĐỔI MÃ SỐ:\n\nBạn đang đổi mã từ "${oldId}" -> "${newId}".\n\nHệ thống sẽ:\n1. Tạo hồ sơ với mã mới.\n2. Chuyển toàn bộ lịch sử vi phạm sang mã mới.\n3. Xóa hồ sơ cũ.\n\nBạn có chắc chắn muốn tiếp tục?`)) return;
+
+                // 1. Get Old Data
+                const oldSnap = await rootRef.child(`Students/${oldId}`).once('value');
+                const oldData = oldSnap.val();
+                
+                if (!oldData) return alert('Lỗi: Không tìm thấy dữ liệu học sinh cũ.');
+
+                const newData = { ...oldData, name, class: cls, id: newId }; // Explicitly set new ID if it was stored in obj
+
+                // 2. Create New Student
+                await rootRef.child(`Students/${newId}`).set(newData);
+
+                // 3. Migrate Violations
+                const vSnap = await rootRef.child('Violations').orderByChild('studentId').equalTo(oldId).once('value');
+                const updates = {};
+                vSnap.forEach(child => {
+                    updates[`Violations/${child.key}/studentId`] = newId;
+                });
+                
+                if (Object.keys(updates).length > 0) {
+                    await rootRef.update(updates);
+                }
+
+                // 4. Delete Old Student
+                await rootRef.child(`Students/${oldId}`).remove();
             }
+            
+            alert('Cập nhật thông tin thành công!');
+            document.getElementById('editStudentModal').style.display = 'none';
         });
 
         window.closeEditModal = () => document.getElementById('editStudentModal').style.display = 'none';
