@@ -53,6 +53,15 @@ function loadConferenceConfig() {
             if (conferenceConfig.name) {
                 document.querySelector('h1').textContent = `📋 ${conferenceConfig.name}`;
             }
+            // Update start time display
+            if (conferenceConfig.startTime) {
+                const startDate = new Date(conferenceConfig.startTime);
+                const timeStr = startDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                const dateStr = startDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                document.getElementById('timeDisplay').textContent = `⏰ Bắt đầu: ${timeStr} - ${dateStr}`;
+            } else {
+                document.getElementById('timeDisplay').textContent = '';
+            }
         }
     });
 }
