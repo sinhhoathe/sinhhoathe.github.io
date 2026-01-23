@@ -45,7 +45,7 @@
                     <div class="field">
                         <label class="label">Tên đăng nhập</label>
                         <div class="control has-icons-left">
-                            <input class="input" type="text" id="username" placeholder="Nhập tên đăng nhập" required autofocus>
+                            <input class="input" type="text" id="username" placeholder="Nhập tên đăng nhập" required autofocus autocapitalize="off" autocomplete="username">
                             <span class="icon is-small is-left">
                                 <span>👤</span>
                             </span>
@@ -55,7 +55,7 @@
                     <div class="field">
                         <label class="label">Mật khẩu</label>
                         <div class="control has-icons-left">
-                            <input class="input" type="password" id="password" placeholder="Nhập mật khẩu" required>
+                            <input class="input" type="password" id="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
                             <span class="icon is-small is-left">
                                 <span>🔒</span>
                             </span>
@@ -118,7 +118,7 @@
             e.preventDefault();
             hideError();
 
-            const username = document.getElementById('username').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
 
             loginBtn.classList.add('is-loading');
