@@ -42,13 +42,22 @@
             <div class="navbar-item">
                 <strong style="color: white;">🎯 Quản lý hội nghị</strong>
             </div>
+            <!-- Burger Menu for Mobile -->
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu" style="color: white;">
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+            </a>
         </div>
-        <div class="navbar-menu">
+        
+        <div id="navbarMenu" class="navbar-menu">
             <div class="navbar-end">
                 <div class="navbar-item">
-                    <span style="color: white; margin-right: 1rem;">👤 <span id="usernameDisplay"></span></span>
+                    <span style="color: white(0,0,0,0.7); margin-right: 1rem;" class="is-hidden-touch">👤 <span id="usernameDisplay"></span></span>
+                    <!-- Mobile only username display if needed, but keeping simple -->
                 </div>
                 <div class="navbar-item">
+                    <span class="is-hidden-desktop" style="margin-right: 10px; font-weight: bold;">👤 <span id="mobileUsernameDisplay"></span></span>
                     <button class="button is-light is-small" id="logoutBtn">
                         🚪 Đăng xuất
                     </button>
@@ -59,6 +68,21 @@
 
     <!-- Login Check Script -->
     <script>
+        // Toggle Mobile Menu
+        document.addEventListener('DOMContentLoaded', () => {
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if ($navbarBurgers.length > 0) {
+                $navbarBurgers.forEach( el => {
+                    el.addEventListener('click', () => {
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+
         // Check if logged in
         if (sessionStorage.getItem('btc_logged_in') !== 'true') {
             window.location.href = 'login.html';
@@ -67,6 +91,9 @@
         // Display username
         const username = sessionStorage.getItem('btc_username') || 'Admin';
         document.getElementById('usernameDisplay').textContent = username;
+        if(document.getElementById('mobileUsernameDisplay')) {
+             document.getElementById('mobileUsernameDisplay').textContent = username;
+        }
         
         // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', () => {

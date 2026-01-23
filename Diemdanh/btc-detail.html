@@ -54,11 +54,18 @@
             <div class="navbar-item">
                 <strong style="color: white;">🎯 Chi tiết hội nghị</strong>
             </div>
+             <!-- Burger Menu for Mobile -->
+             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu" style="color: white;">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+              </a>
         </div>
-        <div class="navbar-menu">
+
+        <div id="navbarMenu" class="navbar-menu">
             <div class="navbar-end">
                 <div class="navbar-item">
-                    <span style="color: white; margin-right: 1rem;">👤 <span id="usernameDisplay"></span></span>
+                    <span style="color: white; margin-right: 1rem;" class="is-hidden-touch">👤 <span id="usernameDisplay"></span></span>
                 </div>
                 <div class="navbar-item">
                     <button class="button is-light is-small" onclick="window.location.href='btc-list.html'">
@@ -76,6 +83,21 @@
 
     <!-- Login Check Script -->
     <script>
+         // Toggle Mobile Menu
+         document.addEventListener('DOMContentLoaded', () => {
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if ($navbarBurgers.length > 0) {
+                $navbarBurgers.forEach( el => {
+                    el.addEventListener('click', () => {
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+
         // Check if logged in
         if (sessionStorage.getItem('btc_logged_in') !== 'true') {
             window.location.href = 'login.html';
