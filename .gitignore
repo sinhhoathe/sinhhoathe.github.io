@@ -1,0 +1,16 @@
+# MacOS rác
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Filesystem metadata
+Attributes
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
