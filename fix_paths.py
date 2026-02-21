@@ -9,7 +9,7 @@ for file in files:
     
     # Choose replacement based on depth
     if '/' in file:
-        content = content.replace('/Logo.webp', '../Logo.webp')
+        content = content.replace('/Logo.webp', '/Logo.webp')
     else:
         content = content.replace('/Logo.webp', './Logo.webp')
         
