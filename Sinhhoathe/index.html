@@ -139,6 +139,91 @@
       </div>
     </section>
 
+    <!-- Ads Section (Added for courses) -->
+    <section class="section pt-0 pb-5">
+      <div class="container">
+        <style>
+          @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+          }
+          @keyframes shimmerAd {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+          }
+          @keyframes floatIcon {
+            0% { transform: translateY(0) rotate(15deg); }
+            50% { transform: translateY(-10px) rotate(20deg); }
+            100% { transform: translateY(0) rotate(15deg); }
+          }
+          .ad-banner {
+            border-radius: 16px; 
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.4);
+            border: 2px solid transparent;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+          .ad-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            background-size: 1000px 100%;
+            animation: shimmerAd 3s infinite linear;
+            z-index: 1;
+            pointer-events: none;
+          }
+          .ad-banner:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(252, 182, 159, 0.7);
+          }
+          .ad-btn {
+            animation: pulseBtn 1.5s infinite; 
+            font-weight: bold; 
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            position: relative;
+            z-index: 2;
+          }
+          .ad-btn:hover {
+            transform: scale(1.1) !important;
+            animation: none;
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
+          }
+          .sun-icon {
+            position: absolute; 
+            right: -20px; 
+            top: -50px; 
+            opacity: 0.15; 
+            color: #d35400;
+            animation: floatIcon 4s ease-in-out infinite;
+            z-index: 0;
+          }
+        </style>
+        <div class="notification p-4 ad-banner">
+          <i class="fas fa-sun fa-10x sun-icon"></i>
+          <div class="columns is-vcentered" style="position: relative; z-index: 2;">
+            <div class="column">
+              <h3 class="title is-4 has-text-danger" style="margin-bottom: 8px; text-shadow: 1px 1px 2px rgba(255,255,255,0.6);">
+                <i class="fas fa-gem mr-2"></i> Góc Khám Phá & Trải Nghiệm Hè ☀️
+              </h3>
+              <p class="subtitle is-6 mt-1 has-text-dark" style="line-height: 1.5; font-weight: 500;">
+                <span class="tag is-danger is-rounded mr-2" style="animation: pulseBtn 2s infinite;">Hot 🔥</span>
+                Gợi ý các khóa học kỹ năng, trại hè rèn luyện, lớp học năng khiếu và nhiều hoạt động thú vị, bổ ích cực "đỉnh" dành cho dịp hè này!
+              </p>
+            </div>
+            <div class="column is-narrow has-text-centered">
+              <a href="../khoahoc.html" class="button is-danger is-rounded is-medium ad-btn">
+                👉 Khám phá ngay
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Information Sections -->
     <section class="section pt-0">
       <div class="container">
