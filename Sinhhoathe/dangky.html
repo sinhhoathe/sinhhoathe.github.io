@@ -47,7 +47,7 @@
                   />
                 </div>
                 <p id="errName" class="help is-error" style="display: none">
-                  Vui lòng nhập HỌ VÀ TÊN bằng chữ IN HOA (A-Z, khoảng trắng,
+                  Vui lòng nhập HỌ VÀ TÊN hợp lệ (chữ cái, khoảng trắng,
                   tối thiểu 2 từ).
                 </p>
               </div>
@@ -575,7 +575,7 @@
         // Validate name
         const nameVal = el.fullName.value.trim();
         if (
-          !/^([A-ZÀ-Ỹ\s]+)$/.test(nameVal) ||
+          !/^([A-Za-zÀ-ỹ\s]+)$/.test(nameVal) ||
           nameVal.split(/\s+/).length < 2
         ) {
           el.errName.style.display = "";
