@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Đoàn phường - Danh sách đăng ký</title>
     <link rel="stylesheet" href="/Sinhhoathe/main.css" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
       body {
         background: #f7f8fc;
@@ -149,6 +150,11 @@
                     <p class="control">
                       <button id="btnReload" class="button is-light">
                         Tải lại
+                      </button>
+                    </p>
+                    <p class="control">
+                      <button id="btnExportExcel" class="button is-success">
+                        Xuất Excel
                       </button>
                     </p>
                   </div>
@@ -457,6 +463,53 @@
       document
         .getElementById("btnReload")
         .addEventListener("click", renderTable);
+
+      document.getElementById("btnExportExcel").addEventListener("click", () => {
+        const mode = (filterField && filterField.value) || "school";
+        const q = ((filterValue && filterValue.value) || "").trim().toLowerCase();
+        
+        // Filter REG_CACHE logic
+        const listToExport = REG_CACHE.filter(item => {
+          if (!q) return true;
+          if (mode === "hamlet") {
+            return (item.hamlet || "").toLowerCase().indexOf(q) !== -1;
+          } else {
+            return (item.school || "").toLowerCase().indexOf(q) !== -1;
+          }
+        });
+
+        if (listToExport.length === 0) {
+          alert("Không có dữ liệu để xuất.");
+          return;
+        }
+
+        // Map data to Vietnamese columns
+        const excelData = listToExport.map((item, index) => ({
+          "STT": index + 1,
+          "Trường học": item.school || "",
+          "Họ và tên học sinh": item.fullName || "",
+          "Năm sinh": item.birthYear || "",
+          "Xã/Phường": item.ward || "",
+          "Thôn/Tổ dân phố": item.hamlet || "",
+          "Họ tên phụ huynh": item.parentName || "",
+          "SĐT phụ huynh": item.parentPhone || "",
+          "Xếp loại": item.grade || ""
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(excelData);
+
+        // Auto-size columns slightly
+        const wscols = [
+          {wch: 5}, {wch: 25}, {wch: 25}, {wch: 10},
+          {wch: 20}, {wch: 20}, {wch: 25}, {wch: 15}, {wch: 15}
+        ];
+        ws['!cols'] = wscols;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Danh_sach_Dang_ky");
+        const fileName = `DanhSach_${mode}_${q || "TatCa"}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+      });
 
       // Filter interactions
       if (filterField)
