@@ -82,7 +82,7 @@
                                 <div class="field">
                                     <label class="label">Số điện thoại <span class="has-text-danger">*</span></label>
                                     <div class="control has-icons-left">
-                                        <input class="input" type="tel" id="phone" placeholder="09xxxxxxx" required>
+                                        <input class="input" type="text" inputmode="tel" id="phone" placeholder="09xxxxxxx" required>
                                         <span class="icon is-small is-left">
                                             <i class="fas fa-phone"></i>
                                         </span>
@@ -176,14 +176,15 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Basic Validation
-            let fullName = document.getElementById('fullName').value.trim().toUpperCase();
-            let phone = document.getElementById('phone').value.replace(/[^+0-9]/g, '');
-            const birthYear = document.getElementById('birthYear').value.trim();
-            const schoolEl = document.getElementById('school');
-            const classEl = document.getElementById('className');
-            const schoolManual = document.getElementById('schoolManual');
-            const classManual = document.getElementById('classManual');
+            try {
+                // Basic Validation
+                let fullName = document.getElementById('fullName').value.trim().toUpperCase();
+                let phone = document.getElementById('phone').value.replace(/[^+0-9]/g, '');
+                const birthYear = document.getElementById('birthYear').value.trim();
+                const schoolEl = document.getElementById('school');
+                const classEl = document.getElementById('className');
+                const schoolManual = document.getElementById('schoolManual');
+                const classManual = document.getElementById('classManual');
             
             // Logic lấy dữ liệu
             let school = "";
@@ -227,13 +228,12 @@
             btnSubmit.classList.add('is-loading');
             btnSubmit.disabled = true;
 
-            try {
-                // Check duplicate phone
-                const snapshot = await db.ref('sinhhoatdoan/members').orderByChild('phone').equalTo(phone).once('value');
-                
-                if (snapshot.exists()) {
-                    throw new Error("Số điện thoại này đã được đăng ký trước đó!");
-                }
+            // Check duplicate phone
+            const snapshot = await db.ref('sinhhoatdoan/members').orderByChild('phone').equalTo(phone).once('value');
+            
+            if (snapshot.exists()) {
+                throw new Error("Số điện thoại này đã được đăng ký trước đó!");
+            }
 
                 // Save Member
                 const memberData = {
@@ -255,7 +255,7 @@
 
             } catch (error) {
                 console.error(error);
-                if (error.message.includes("đã được đăng ký")) {
+                if (error.message && error.message.includes("đã được đăng ký")) {
                     document.getElementById('errPhone').textContent = error.message;
                     document.getElementById('errPhone').classList.remove('is-hidden');
                 } else {
