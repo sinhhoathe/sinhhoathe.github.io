@@ -70,11 +70,12 @@
                                 <div class="field">
                                     <label class="label">Năm sinh <span class="has-text-danger">*</span></label>
                                     <div class="control has-icons-left">
-                                        <input class="input" type="number" id="birthYear" placeholder="VD: 2005" required>
+                                        <input class="input" type="text" inputmode="numeric" pattern="[0-9]*" id="birthYear" placeholder="VD: 2005" required>
                                         <span class="icon is-small is-left">
                                             <i class="fas fa-birthday-cake"></i>
                                         </span>
                                     </div>
+                                    <p class="help is-danger is-hidden" id="errYear">Vui lòng nhập năm sinh (4 chữ số).</p>
                                 </div>
                             </div>
                             <div class="column is-6">
@@ -131,6 +132,7 @@
 
 
 
+                        <p class="help is-danger is-hidden pb-2 has-text-centered" id="errGeneral" style="font-size: 1rem;"></p>
                         <div class="field mt-5">
                             <div class="control">
                                 <button type="submit" class="button is-primary is-fullwidth is-rounded is-medium" id="btnSubmit">
@@ -206,9 +208,11 @@
                 document.getElementById('errName').classList.add('is-hidden');
             }
 
-            if (!birthYear) {
-                alert("Vui lòng nhập năm sinh.");
+            if (!birthYear || !/^\d{4}$/.test(birthYear)) {
+                document.getElementById('errYear').classList.remove('is-hidden');
                 return;
+            } else {
+                document.getElementById('errYear').classList.add('is-hidden');
             }
 
             if (!/^\+?\d{9,12}$/.test(phone)) {
@@ -255,7 +259,8 @@
                     document.getElementById('errPhone').textContent = error.message;
                     document.getElementById('errPhone').classList.remove('is-hidden');
                 } else {
-                    alert('Đã có lỗi xảy ra: ' + error.message);
+                    document.getElementById('errGeneral').textContent = 'Đã có lỗi xảy ra: ' + error.message;
+                    document.getElementById('errGeneral').classList.remove('is-hidden');
                 }
                 btnSubmit.classList.remove('is-loading');
                 btnSubmit.disabled = false;
