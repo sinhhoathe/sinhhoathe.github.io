@@ -53,11 +53,11 @@
                         </p>
                     </div>
 
-                    <form id="registerForm">
+                    <form id="registerForm" novalidate>
                         <div class="field">
                             <label class="label">Họ và tên <span class="has-text-danger">*</span></label>
                             <div class="control has-icons-left">
-                                <input class="input" type="text" id="fullName" placeholder="VD: NGUYỄN VĂN A" required oninput="this.value = this.value.toUpperCase()" style="text-transform: uppercase;">
+                                <input class="input" type="text" id="fullName" placeholder="VD: NGUYỄN VĂN A" required style="text-transform: uppercase;">
                                 <span class="icon is-small is-left">
                                     <i class="fas fa-user"></i>
                                 </span>
@@ -175,8 +175,8 @@
             e.preventDefault();
             
             // Basic Validation
-            const fullName = document.getElementById('fullName').value.trim();
-            const phone = document.getElementById('phone').value.trim();
+            let fullName = document.getElementById('fullName').value.trim().toUpperCase();
+            let phone = document.getElementById('phone').value.replace(/[^+0-9]/g, '');
             const birthYear = document.getElementById('birthYear').value.trim();
             const schoolEl = document.getElementById('school');
             const classEl = document.getElementById('className');
@@ -206,8 +206,13 @@
                 document.getElementById('errName').classList.add('is-hidden');
             }
 
-            if (!/^\d{9,11}$/.test(phone)) {
-                document.getElementById('errPhone').textContent = "Số điện thoại phải từ 9-11 chữ số.";
+            if (!birthYear) {
+                alert("Vui lòng nhập năm sinh.");
+                return;
+            }
+
+            if (!/^\+?\d{9,12}$/.test(phone)) {
+                document.getElementById('errPhone').textContent = "Số điện thoại phải từ 9-12 chữ số.";
                 document.getElementById('errPhone').classList.remove('is-hidden');
                 return;
             } else {
