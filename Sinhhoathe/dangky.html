@@ -43,6 +43,7 @@
                     type="text"
                     placeholder="VD: NGUYỄN VĂN A"
                     required
+                    style="text-transform: uppercase;"
                   />
                 </div>
                 <p id="errName" class="help is-error" style="display: none">
@@ -131,8 +132,9 @@
                     id="parentName"
                     class="input"
                     type="text"
-                    placeholder="VD: Nguyễn Thị B"
+                    placeholder="VD: NGUYỄN THỊ B"
                     required
+                    style="text-transform: uppercase;"
                   />
                 </div>
                 <p
@@ -615,12 +617,12 @@
         if (hasError) return;
 
         const payload = {
-          fullName: nameVal,
+          fullName: nameVal.toUpperCase(),
           birthYear: el.birthYear.value,
           school: el.school.value,
           ward: el.ward.value,
           hamlet: el.hamlet.value,
-          parentName: pnVal,
+          parentName: pnVal.toUpperCase(),
           parentPhone: el.parentPhone.value,
           grade: "",
           savedAt: Date.now(),
