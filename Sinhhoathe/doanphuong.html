@@ -40,12 +40,6 @@
           <div class="card-content">
             <h2 class="title is-5">Đoàn phường - Đăng nhập</h2>
             <div class="field">
-              <label class="label">ID</label>
-              <div class="control">
-                <input id="gateId" class="input" placeholder="Nhập ID:..." />
-              </div>
-            </div>
-            <div class="field">
               <label class="label">Mật khẩu</label>
               <div class="control">
                 <input
@@ -64,7 +58,7 @@
               </div>
             </div>
             <p id="gateErr" class="help is-danger" style="display: none">
-              Sai ID hoặc mật khẩu.
+              Sai mật khẩu.
             </p>
           </div>
         </div>
@@ -440,7 +434,7 @@
             const key = e.target.getAttribute("data-key");
             if (!key) return;
             const pwd = prompt("Nhập mật khẩu ADMIN để xóa:");
-            if (pwd === "tranhuyhoang") {
+            if (pwd === "1235") {
               if (confirm("Chắc chắn xóa?")) {
                 firebase
                   .database()
@@ -865,13 +859,11 @@
         gate.style.display = "";
         app.style.display = "none";
         const btn = document.getElementById("btnGateLogin");
-        const id = document.getElementById("gateId");
         const pw = document.getElementById("gatePass");
         const err = document.getElementById("gateErr");
         btn.addEventListener("click", () => {
-          const vid = (id.value || "").trim();
           const vpw = (pw.value || "").trim();
-          if (vid === "ADMIN" && vpw === "tranhuyhoang") {
+          if (vpw === "1235") {
             sessionStorage.setItem("dp-admin-auth", "ok");
             gate.style.display = "none";
             app.style.display = "";
