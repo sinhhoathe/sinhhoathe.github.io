@@ -12,9 +12,18 @@ class AdShieldEngine {
     ];
     this.currentProxyIdx = 0;
 
+    // Chỉ lọc các thương hiệu trang web người lớn nổi tiếng hàng đầu thế giới
     this.sensitiveKeywords = [
-      'porn', 'xxx', 'hentai', 'xvideos', 'pornhub', 'sex', 'jav', 
-      'vlxx', 'phimsex', 'bet88', 'fun88', 'kubet', 'w88'
+      'pornhub',
+      'xvideos',
+      'xnxx',
+      'redtube',
+      'youporn',
+      'tube8',
+      'spankbang',
+      'brazzers',
+      'chaturbate',
+      'onlyfans'
     ];
 
     this.adPatterns = [
