@@ -34,7 +34,11 @@ const translations = {
 
     // Empty state & Guide
     hero_title: "Enjoy Web Games & Browsing — Zero Annoying Redirects!",
-    hero_desc: "Simply paste any web game or site link above. <strong>AdShield</strong> automatically isolates the destination in a secure Sandboxed container, neutralizing unwanted redirects and eliminating mouse-trap popups.",
+    hero_desc: "Simply paste any web game or site link below. <strong>AdShield</strong> automatically isolates the destination in a secure Sandboxed container, neutralizing unwanted redirects and eliminating mouse-trap popups.",
+
+    launcher_box_title: "Quick Game & Website Launcher",
+    launcher_box_tag: "Shield Active",
+    launcher_hint: "Tip: Tap '📋 Paste', then hit '🚀 Safe Launch' to start playing without spam ads!",
 
     step1_badge: "STEP 1",
     step1_title: "Copy Any Link",
@@ -117,7 +121,11 @@ const translations = {
     loading_sub: "Loại bỏ popup, vô hiệu hóa redirect và tối ưu khung hình",
 
     hero_title: "Thoải Mái Chơi Game & Lướt Web - Không Lo Bị Nhảy Link!",
-    hero_desc: "Chỉ cần dán link trang web hoặc game vào ô phía trên, <strong>AdShield</strong> sẽ tự động cô lập trang đích trong một môi trường cát (Sandboxed Container), triệt tiêu các mã tự ý nhảy link (Redirect) và chặn đứng mọi pop-up bẫy chuột.",
+    hero_desc: "Chỉ cần dán link trang web hoặc game vào ô bên dưới, <strong>AdShield</strong> sẽ tự động cô lập trang đích trong một môi trường cát (Sandboxed Container), triệt tiêu các mã tự ý nhảy link (Redirect) và chặn đứng mọi pop-up bẫy chuột.",
+
+    launcher_box_title: "Khởi Chạy Game & Web Nhanh",
+    launcher_box_tag: "Lá Chắn Đang Bật",
+    launcher_hint: "Mẹo: Bấm '📋 Dán Link', sau đó bấm '🚀 Mở An Toàn' để vào chơi ngay không bị quảng cáo làm phiền!",
 
     step1_badge: "BƯỚC 1",
     step1_title: "Sao Chép Liên Kết",

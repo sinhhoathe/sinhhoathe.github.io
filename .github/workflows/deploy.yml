@@ -38,9 +38,11 @@ jobs:
           find ./ -maxdepth 2 -name "*.html" -not -path "./dist/*" -exec sh -c 'html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true "$1" -o "./dist/$1"' _ {} \;
 
       - name: Copy other static files (CSS, Images, CNAME)
-        # Copy các tài nguyên còn lại, bao gồm CSS và CNAME
+        # Copy các tài nguyên còn lại, bao gồm CSS, robots.txt, sitemap.xml và CNAME
         run: |
           cp CNAME ./dist/ || true
+          cp robots.txt ./dist/ || true
+          cp sitemap.xml ./dist/ || true
           cp -r css/* ./dist/css/ || true
 
       - name: Deploy to GitHub Pages

@@ -94,10 +94,168 @@ body {
   text-transform: uppercase;
 }
 
-/* URL Input & Controls Bar */
-.control-bar {
-  flex: 1;
+/* ========================================================
+   HERO LAUNCHER BOX (NỔI BẬT DÀNH CHO MOBILE & DESKTOP)
+   ======================================================== */
+.hero-launcher-card {
+  width: 100%;
   max-width: 780px;
+  margin: 12px auto 32px auto;
+  background: linear-gradient(145deg, #182032 0%, #111520 100%);
+  border: 2px solid rgba(0, 240, 255, 0.45);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 240, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  animation: glowPulse 4s infinite alternate ease-in-out;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 240, 255, 0.15); border-color: rgba(0, 240, 255, 0.35); }
+  100% { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.7); }
+}
+
+.hero-launcher-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-green), transparent);
+}
+
+.launcher-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.launcher-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.launcher-tag {
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(0, 255, 135, 0.3);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.launcher-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hero-url-input-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hero-url-input-wrap .url-prefix-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--accent-cyan);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.hero-url-input {
+  width: 100%;
+  background: #0B0E15;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 16px 100px 16px 46px;
+  color: #FFF;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.hero-url-input:focus {
+  border-color: var(--accent-cyan);
+  background: #0E131E;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 18px rgba(0, 240, 255, 0.35);
+}
+
+.hero-paste-btn {
+  position: absolute;
+  right: 10px;
+  background: linear-gradient(135deg, #253348, #182232);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--accent-cyan);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.hero-paste-btn:hover {
+  background: var(--accent-cyan);
+  color: #0B0E14;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+
+.hero-launch-btn {
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, #0099FF 100%);
+  color: #05101A;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 16px 28px;
+  font-weight: 800;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0, 240, 255, 0.35);
+}
+
+.hero-launch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 240, 255, 0.55);
+}
+
+.hero-launch-btn:active {
+  transform: translateY(1px);
+}
+
+.launcher-hint-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* URL Input & Controls Bar in Header (Fallback) */
+.control-bar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -714,6 +872,28 @@ body.fullscreen-mode .ingame-hud {
   .brand {
     justify-content: space-between;
     width: 100%;
+  }
+
+  .hero-launcher-card {
+    padding: 18px 14px;
+    margin: 8px auto 20px auto;
+  }
+
+  .launcher-input-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-url-input {
+    padding: 14px 90px 14px 42px;
+    font-size: 14px;
+  }
+
+  .hero-launch-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 16px;
   }
 
   .control-bar {

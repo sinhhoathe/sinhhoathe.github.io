@@ -2,9 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title data-i18n="page_title">AdShield Player - Block Ads & Prevent Auto-Redirects</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  
+  <!-- SEO Primary Meta Tags -->
+  <title data-i18n="page_title">AdShield Player - Block Ads & Prevent Auto-Redirects for Web Games</title>
+  <meta name="title" content="AdShield Player - Block Ads & Prevent Auto-Redirects for Web Games">
+  <meta name="description" content="Play any online web game and browse websites without popups, annoying ads, or auto-redirects. Instant Sandboxed protection and code cleaner for mobile & desktop.">
+  <meta name="keywords" content="block popups, prevent redirect, web game adblock, play games without ads, anti redirect, unblocked games, clean game player">
+  <meta name="author" content="AdShield">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://sinhhoathe.site/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sinhhoathe.site/">
+  <meta property="og:title" content="AdShield Player - Play Web Games Without Ads & Redirects">
+  <meta property="og:description" content="Tired of annoying redirects and popup ads when playing web games? Paste your link into AdShield and enjoy uninterrupted gaming.">
+  <meta property="og:image" content="https://sinhhoathe.site/banner.png">
+
+  <!-- Twitter Card -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://sinhhoathe.site/">
+  <meta property="twitter:title" content="AdShield Player - Play Web Games Without Ads & Redirects">
+  <meta property="twitter:description" content="Tired of annoying redirects and popup ads when playing web games? Paste your link into AdShield and enjoy uninterrupted gaming.">
+  <meta property="twitter:image" content="https://sinhhoathe.site/banner.png">
+
+  <!-- Favicon & Icons -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  <meta name="theme-color" content="#0B0E14">
+
+  <!-- Schema.org JSON-LD Structured Data for Google SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AdShield Player",
+    "url": "https://sinhhoathe.site/",
+    "description": "A web-based sandboxed player that prevents auto-redirects and blocks pop-up ads for online web games.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -21,36 +66,15 @@
       </div>
     </a>
 
-    <!-- Control bar: Input URL & Launch Button -->
-    <div class="control-bar">
-      <div class="url-input-wrap">
-        <span class="url-prefix-icon">🔗</span>
-        <input 
-          type="text" 
-          id="url-input" 
-          class="url-input" 
-          placeholder="Paste website or game link here (e.g. poki.com, 2048...)"
-          data-i18n-placeholder="url_placeholder"
-          autocomplete="off"
-          spellcheck="false"
-        >
-        <button id="paste-btn" class="url-paste-btn" data-i18n="btn_paste">Paste</button>
-      </div>
-
-      <button id="launch-btn" class="btn-primary">
-        <span data-i18n="btn_launch">🚀 Safe Launch</span>
-      </button>
-
-      <!-- Language Selector Dropdown -->
-      <div class="lang-selector-wrap">
-        <select id="lang-select" class="lang-select" title="Change Language">
-          <option value="en">🇺🇸 English</option>
-          <option value="vi">🇻🇳 Tiếng Việt</option>
-          <option value="es">🇪🇸 Español</option>
-          <option value="zh">🇨🇳 中文</option>
-          <option value="ja">🇯🇵 日本語</option>
-        </select>
-      </div>
+    <!-- Top Right Language Selector -->
+    <div class="lang-selector-wrap">
+      <select id="lang-select" class="lang-select" title="Change Language">
+        <option value="en">🇺🇸 English</option>
+        <option value="vi">🇻🇳 Tiếng Việt</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ja">🇯🇵 日本語</option>
+      </select>
     </div>
   </header>
 
@@ -115,11 +139,51 @@
 
     <!-- Welcome / Empty State Screen -->
     <section class="empty-state" id="empty-state">
+      
+      <!-- HERO TITLE & SUBTITLE -->
       <div class="empty-icon-shield">🛡️</div>
-      <h2 class="empty-title" data-i18n="hero_title">Enjoy Web Games & Browsing — Zero Annoying Redirects!</h2>
+      <h1 class="empty-title" data-i18n="hero_title">Enjoy Web Games & Browsing — Zero Annoying Redirects!</h1>
       <p class="empty-desc" data-i18n="hero_desc">
-        Simply paste any web game or site link above. <strong>AdShield</strong> automatically isolates the destination in a secure Sandboxed container, neutralizing unwanted redirects and eliminating mouse-trap popups.
+        Simply paste any web game or site link below. <strong>AdShield</strong> automatically isolates the destination in a secure Sandboxed container, neutralizing unwanted redirects and eliminating mouse-trap popups.
       </p>
+
+      <!-- ========================================================
+           HERO LAUNCHER CARD - NỔI BẬT NHẤT TRANG
+           ======================================================== -->
+      <div class="hero-launcher-card">
+        <div class="launcher-header-row">
+          <div class="launcher-title">
+            <span>⚡</span>
+            <span data-i18n="launcher_box_title">Quick Game & Website Launcher</span>
+          </div>
+          <span class="launcher-tag" data-i18n="launcher_box_tag">Shield Active</span>
+        </div>
+
+        <div class="launcher-input-row">
+          <div class="hero-url-input-wrap">
+            <span class="url-prefix-icon">🔗</span>
+            <input 
+              type="text" 
+              id="url-input" 
+              class="hero-url-input" 
+              placeholder="Paste website or game link here (e.g. poki.com, 2048...)"
+              data-i18n-placeholder="url_placeholder"
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button id="paste-btn" class="hero-paste-btn" data-i18n="btn_paste">📋 Paste</button>
+          </div>
+
+          <button id="launch-btn" class="hero-launch-btn">
+            <span data-i18n="btn_launch">🚀 Safe Launch</span>
+          </button>
+        </div>
+
+        <div class="launcher-hint-text">
+          <span>💡</span>
+          <span data-i18n="launcher_hint">Tip: Tap 'Paste', then hit 'Safe Launch' to start playing without spam ads!</span>
+        </div>
+      </div>
 
       <!-- 3-STEP VISUAL GUIDE -->
       <div class="guide-steps-container">
