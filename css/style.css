@@ -700,20 +700,204 @@ body.fullscreen-mode .ingame-hud {
   right: 10px;
 }
 
-/* Responsive adjustments */
+/* ========================================================
+   RESPONSIVE & MOBILE OPTIMIZATIONS (TABLETS & PHONES)
+   ======================================================== */
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
     align-items: stretch;
-    padding: 10px 14px;
+    padding: 10px 12px;
+    gap: 10px;
   }
+
+  .brand {
+    justify-content: space-between;
+    width: 100%;
+  }
+
   .control-bar {
     max-width: 100%;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
   }
+
+  .url-input-wrap {
+    width: 100%;
+  }
+
+  .url-input {
+    padding: 12px 76px 12px 38px;
+    font-size: 14px;
+    height: 46px;
+  }
+
+  .url-prefix-icon {
+    left: 12px;
+  }
+
+  .url-paste-btn {
+    right: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 15px;
+    height: 46px;
+  }
+
+  .lang-selector-wrap {
+    width: 100%;
+  }
+
+  .lang-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    height: 42px;
+    text-align-last: center;
+  }
+
   .sub-bar {
-    padding: 8px 14px;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
+
+  .engine-selector {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .engine-pill {
+    padding: 6px 12px;
+    font-size: 12px;
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .shield-badges {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .shield-item {
+    font-size: 11px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 24px 14px 40px;
+  }
+
+  .empty-icon-shield {
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+    margin-bottom: 14px;
+  }
+
+  .empty-title {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .empty-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .guide-steps-container {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .guide-step-card {
+    padding: 20px 14px 16px;
+  }
+
   .feature-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .feature-card {
+    padding: 14px;
+  }
+
+  .quick-games {
+    gap: 8px;
+  }
+
+  .quick-game-tag {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
+
+  .bookmarklet-box {
+    margin-top: 24px;
+    padding: 12px 14px;
+  }
+
+  /* In-game Floating HUD for Mobile */
+  .ingame-hud {
+    top: auto;
+    bottom: 16px;
+    right: 50%;
+    transform: translateX(50%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    padding: 4px 10px;
+    width: auto;
+    max-width: 90vw;
+    justify-content: center;
+  }
+
+  .hud-btn {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .toast-msg {
+    width: 90%;
+    text-align: center;
+    justify-content: center;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .warning-modal-card {
+    padding: 22px 16px;
+    margin: 12px;
+  }
+}
+
+/* Extra small devices (phones < 380px) */
+@media (max-width: 380px) {
+  .brand-name {
+    font-size: 17px;
+  }
+  .brand-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  .quick-game-tag {
+    flex: 1 1 100%;
   }
 }
