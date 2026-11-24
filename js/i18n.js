@@ -63,9 +63,10 @@ const translations = {
     feat3_desc: "Full support for audio, keyboard, mouse, and gamepads with 100% native performance.",
 
     quick_demo_label: "Try instant ad-free demo games:",
-    game_2048: "🔢 2048 Game",
-    game_hextris: "🔷 Hextris Puzzle",
+    game_2048: "🔢 2048 Original",
     game_flappy: "🐥 Flappy Bird",
+    game_clumsy: "🐦 Clumsy Bird",
+    game_minesweeper: "💣 Minesweeper",
 
     // Bookmarklet
     bookmarklet_tip: "💡 Quick trick without pasting links:",
@@ -149,9 +150,10 @@ const translations = {
     feat3_desc: "Giữ trọn vẹn âm thanh, điều khiển phím, chuột và tay cầm với hiệu năng mượt mà 100%.",
 
     quick_demo_label: "Trải nghiệm thử ngay:",
-    game_2048: "🔢 Game 2048",
-    game_hextris: "🔷 Hextris Xếp Hình",
+    game_2048: "🔢 2048 Cổ Điển",
     game_flappy: "🐥 Flappy Bird",
+    game_clumsy: "🐦 Clumsy Bird",
+    game_minesweeper: "💣 Dò Mìn",
 
     bookmarklet_tip: "💡 Mẹo nhanh không cần dán link:",
     bookmarklet_desc: "Bạn kéo nút này thả lên thanh Dấu trang (Bookmark Bar) của trình duyệt: <a id='bookmarklet-drag-link' href='#' style='color: #00F0FF; font-weight: 700; text-decoration: underline; margin: 0 4px;'>🛡️ AdShield 1-Click</a>. Mỗi khi đang ở bất kỳ trang web nào bị nhảy popup làm phiền, chỉ cần bấm nút này trên thanh Bookmark để triệt tiêu popup ngay lập tức!",
