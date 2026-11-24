@@ -33,34 +33,34 @@ const translations = {
     loading_sub: "Isolating environment, stripping popups, and optimizing framerate",
 
     // Empty state & Guide
-    hero_title: "Enjoy Web Games & Browsing — Zero Annoying Redirects!",
-    hero_desc: "Simply paste any web game or site link below. <strong>AdShield</strong> automatically isolates the destination in a secure Sandboxed container, neutralizing unwanted redirects and eliminating mouse-trap popups.",
+    hero_title: "Tired of Ads Hijacking Your Screen & Forcing Redirects?",
+    hero_desc: "Ever felt frustrated playing a game or reading online, only to be hit by endless popups and forcibly redirected to sketchy pages? <strong>AdShield</strong> locks the target website in an impenetrable Sandbox cage — killing auto-redirects and blocking stealth popups on the spot.",
 
-    launcher_box_title: "Quick Game & Website Launcher",
-    launcher_box_tag: "Shield Active",
-    launcher_hint: "Tip: Tap '📋 Paste', then hit '🚀 Safe Launch' to start playing without spam ads!",
+    launcher_box_title: "Paste URL & Play Ad-Free",
+    launcher_box_tag: "Shield Ready",
+    launcher_hint: "Tip: Tap '📋 Paste', then hit '🚀 Safe Launch' to enjoy your game in peace!",
 
     step1_badge: "STEP 1",
-    step1_title: "Copy Any Link",
-    step1_desc: "Copy the link of your friend's game, an HTML5 web game, or any ad-infested website.",
+    step1_title: "Copy the Annoying Link",
+    step1_desc: "Copy the website or game link that is currently spamming you with popups and redirects.",
 
     step2_badge: "STEP 2",
     step2_title: "Paste into AdShield",
-    step2_desc: "Paste the URL into the search bar above and click the green <strong>'Safe Launch'</strong> button.",
+    step2_desc: "Paste the URL into the box above and tap the bright green <strong>'Safe Launch'</strong> button.",
 
     step3_badge: "STEP 3",
-    step3_title: "Enjoy Uninterrupted",
-    step3_desc: "The game runs securely locked in its frame without spam popups or getting redirected.",
+    step3_title: "Zero Redirects, Pure Fun",
+    step3_desc: "The page stays trapped inside your screen. No surprise tabs, no scam redirects, just clean gameplay.",
 
     // Features
-    feat1_title: "Zero Auto-Redirects",
-    feat1_desc: "Revokes top-navigation authority. Websites can never force-redirect you to gambling or spam pages.",
+    feat1_title: "Kills Auto-Redirects",
+    feat1_desc: "Revokes top-navigation authority. Shady websites can never kick you out to spam or scam portals.",
 
-    feat2_title: "Block Phantom Pop-ups",
-    feat2_desc: "Suppresses window.open commands whenever you click on sneaky overlay ad traps.",
+    feat2_title: "Destroys Hidden Pop-ups",
+    feat2_desc: "Suppresses stealth window.open triggers whenever you accidentally tap anywhere on the screen.",
 
-    feat3_title: "Maximum Framerate & Input",
-    feat3_desc: "Full support for audio, keyboard, mouse, and gamepads with 100% native performance.",
+    feat3_title: "Full Speed & Fluid Controls",
+    feat3_desc: "Preserves audio, keys, touch gestures, and controllers with 100% native responsiveness.",
 
     quick_demo_label: "Try instant ad-free demo games:",
     game_2048: "🔢 2048 Original",
@@ -121,33 +121,33 @@ const translations = {
     loading_title: "Đang thiết lập lá chắn bảo vệ AdShield...",
     loading_sub: "Loại bỏ popup, vô hiệu hóa redirect và tối ưu khung hình",
 
-    hero_title: "Thoải Mái Chơi Game & Lướt Web - Không Lo Bị Nhảy Link!",
-    hero_desc: "Chỉ cần dán link trang web hoặc game vào ô bên dưới, <strong>AdShield</strong> sẽ tự động cô lập trang đích trong một môi trường cát (Sandboxed Container), triệt tiêu các mã tự ý nhảy link (Redirect) và chặn đứng mọi pop-up bẫy chuột.",
+    hero_title: "Quá Mệt Mỏi Vì Đang Lướt Web Thì Bị Nhảy Sang Trang Khác?",
+    hero_desc: "Bạn có từng ức chế khi đang cao hứng chơi game hoặc đọc truyện thì quảng cáo giăng kín màn hình, vừa chạm tay vào là lập tức bị văng sang Shopee, cờ bạc hay web lạ? <strong>AdShield</strong> sẽ nhốt trang web đó vào một lồng bảo vệ Sandboxed — chặt đứt hoàn toàn mã tự ý chuyển trang và chặn đứng mọi pop-up bẫy!",
 
-    launcher_box_title: "Khởi Chạy Game & Web Nhanh",
-    launcher_box_tag: "Lá Chắn Đang Bật",
-    launcher_hint: "Mẹo: Bấm '📋 Dán Link', sau đó bấm '🚀 Mở An Toàn' để vào chơi ngay không bị quảng cáo làm phiền!",
+    launcher_box_title: "Dán Link Chơi Game & Lướt Web Sạch",
+    launcher_box_tag: "Lá Chắn Sẵn Sàng",
+    launcher_hint: "Mẹo: Bấm '📋 Dán Link' rồi chọn '🚀 Mở An Toàn' để tận hưởng không gian yên bình không bị làm phiền!",
 
     step1_badge: "BƯỚC 1",
-    step1_title: "Sao Chép Liên Kết",
-    step1_desc: "Copy link game của bạn bè hoặc trang web chứa nhiều quảng cáo rác.",
+    step1_title: "Copy Cái Link Phiền Phức",
+    step1_desc: "Sao chép đường link trang web hoặc game đang làm bạn bực mình vì liên tục nhảy quảng cáo.",
 
     step2_badge: "BƯỚC 2",
     step2_title: "Dán Vào AdShield",
-    step2_desc: "Dán link vào thanh tìm kiếm ở đầu trang rồi bấm nút <strong>'Mở An Toàn'</strong> màu xanh.",
+    step2_desc: "Dán link vào khung nổi bật ở trên rồi bấm nút <strong>'Mở An Toàn'</strong> màu xanh.",
 
     step3_badge: "BƯỚC 3",
-    step3_title: "Tận Hưởng Trải Nghiệm",
-    step3_desc: "Game được khóa cứng trong khung, không còn quảng cáo giật giũa hay bị văng sang trang khác.",
+    step3_title: "Chơi Mượt, Không Bị Văng",
+    step3_desc: "Trang web bị khóa chặt trong màn hình. Bạn thoải mái chạm bấm mà không lo bị mở thêm tab ma nào nữa.",
 
-    feat1_title: "Chặn Tuyệt Đối Redirect",
-    feat1_desc: "Vô hiệu hóa quyền cướp tab (top-navigation). Trang web không thể tự ý chuyển hướng bạn sang trang cờ bạc, shopee...",
+    feat1_title: "Triệt Hạ Auto-Redirect",
+    feat1_desc: "Tước đoạt quyền cướp tab. Mọi đoạn mã cố tình lôi bạn sang trang quảng cáo đều bị vô hiệu hóa 100%.",
 
-    feat2_title: "Ngăn Pop-up & Tab Ma",
-    feat2_desc: "Chặn lệnh mở tab ngầm (window.open) mỗi khi bạn vô tình bấm nhầm vào các nút bẫy trên màn hình.",
+    feat2_title: "Chặn Đứng Tab Ma & Pop-up",
+    feat2_desc: "Triệt tiêu lệnh mở cửa sổ ngầm (window.open) mỗi khi bạn vô tình chạm nhầm vào màn hình.",
 
-    feat3_title: "Tốc Độ Khung Hình Tối Đa",
-    feat3_desc: "Giữ trọn vẹn âm thanh, điều khiển phím, chuột và tay cầm với hiệu năng mượt mà 100%.",
+    feat3_title: "Tốc Độ Cực Nhanh & Mượt Mà",
+    feat3_desc: "Giữ trọn vẹn âm thanh, điều khiển vuốt chạm, chuột và bàn phím với hiệu năng gốc tối đa.",
 
     quick_demo_label: "Trải nghiệm thử ngay:",
     game_2048: "🔢 2048 Cổ Điển",
